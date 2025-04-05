@@ -1,7 +1,5 @@
 package com.example.olditemtradeplatform.entity;
 
-import com.example.olditemtradeplatform.entity.Member;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -25,4 +23,8 @@ public class ChatRoom {
 
     @OneToMany(mappedBy = "chatroom")
     List<ChatMessage> chatmessages = new ArrayList<>();
+
+    public boolean hasParticipant(Member member) {
+        return member1.equals(member) || member2.equals(member);
+    }
 }
