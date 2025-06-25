@@ -13,15 +13,15 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member1_id", nullable = false)
     Member member1;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member2_id", nullable = false)
     Member member2;
 
-    @OneToMany(mappedBy = "chatroom")
+    @OneToMany(mappedBy = "chatroom", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ChatMessage> chatmessages = new ArrayList<>();
 
     public boolean hasParticipant(Member member) {

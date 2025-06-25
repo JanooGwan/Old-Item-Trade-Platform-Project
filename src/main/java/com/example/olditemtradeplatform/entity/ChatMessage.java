@@ -14,7 +14,7 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     Member sender;
 
@@ -22,7 +22,5 @@ public class ChatMessage {
     String content;
 
     @Column
-    @LastModifiedDate
-    LocalDateTime sentAt;
-
+    Long sentAt;
 }

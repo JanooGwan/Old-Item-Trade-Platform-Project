@@ -5,21 +5,15 @@ import lombok.Getter;
 
 @Entity
 @Getter
-public class Product {
+public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
+
+    @Column(nullable = false, length = 1000)
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
-    Post post;
-
-    @Column(nullable = false)
-    String name;
-
-    @Column(nullable = false)
-    Long count;
-
-    @Column(nullable = false)
-    Long price;
+    private Post post;
 }
