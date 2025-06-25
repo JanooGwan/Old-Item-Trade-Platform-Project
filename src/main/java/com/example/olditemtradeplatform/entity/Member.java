@@ -33,4 +33,5 @@ public class Member {
 
     @OneToMany(mappedBy = "member2", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> member2Rooms = new ArrayList<>();
+
 }
