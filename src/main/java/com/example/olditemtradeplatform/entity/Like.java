@@ -1,7 +1,6 @@
 package com.example.olditemtradeplatform.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,22 +8,18 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+public class Like {
+
+    @EmbeddedId
+    LikeId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("postId")
     @JoinColumn(name = "post_id", nullable = false)
     Post post;
 
-    @NotBlank
-    @Column(nullable = false)
-    String name;
-
-    @Column(nullable = false)
-    Long count;
-
-    @Column(nullable = false)
-    Long price;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("memberId")
+    @JoinColumn(name = "member_id", nullable = false)
+    Member member;
 }

@@ -1,13 +1,12 @@
 package com.example.olditemtradeplatform.entity;
 
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -16,19 +15,20 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatMessage {
+public class ReportOfPost {
 
     @EmbeddedId
-    ChatMessageId id;
+    ReportOfPostId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("senderId")
-    @JoinColumn(name = "sender_id", nullable = false)
-    Member sender;
+    @MapsId("postId")
+    @JoinColumn(name = "post_id", nullable = false)
+    Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chatroom_id", nullable = false)
-    ChatRoom chatroom;
+    @MapsId("reporterId")
+    @JoinColumn(name = "reporter_id", nullable = false)
+    Member reporter;
 
     @NotBlank
     @Column(nullable = false)
@@ -36,11 +36,14 @@ public class ChatMessage {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    LocalDateTime sentDate;
+    LocalDateTime reportedDate;
 
-    @Column(nullable = false, updatable = false)
-    Long sentAt;
+    public ReportOfPost(Post post, Member reporter, String content) {
+        this.post = post;
+        this.reporter = reporter;
+        this.id = new ReportOfPostId(post.getId(), reporter.getId());
+        this.content = content;
+        this.reportedDate = LocalDateTime.now();
+    }
 
-    @Column(nullable = false)
-    boolean isRead;
 }

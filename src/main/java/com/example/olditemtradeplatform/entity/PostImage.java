@@ -9,22 +9,24 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+public class PostImage {
+
+    @EmbeddedId
+    private PostImageId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("postId")
     @JoinColumn(name = "post_id", nullable = false)
-    Post post;
+    private Post post;
 
     @NotBlank
-    @Column(nullable = false)
-    String name;
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
 
-    @Column(nullable = false)
-    Long count;
 
-    @Column(nullable = false)
-    Long price;
+    public PostImage(Post post, Long imageAt, String imageUrl) {
+        this.post = post;
+        this.id = new PostImageId(post.getId(), imageAt);
+        this.imageUrl = imageUrl;
+    }
 }
