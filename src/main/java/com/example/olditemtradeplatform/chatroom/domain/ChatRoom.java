@@ -4,6 +4,7 @@ import com.example.olditemtradeplatform.chatmessage.domain.ChatMessage;
 import com.example.olditemtradeplatform.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom {
 
@@ -29,6 +31,12 @@ public class ChatRoom {
 
     @OneToMany(mappedBy = "chatroom", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ChatMessage> chatmessages = new ArrayList<>();
+
+
+    public ChatRoom(Member member1, Member member2) {
+        this.member1 = member1;
+        this.member2 = member2;
+    }
 
     public boolean hasParticipant(Member member) {
         return member1.equals(member) || member2.equals(member);

@@ -1,5 +1,6 @@
 package com.example.olditemtradeplatform.product.dto;
 
+import com.example.olditemtradeplatform.product.domain.Product;
 import lombok.*;
 
 @Getter
