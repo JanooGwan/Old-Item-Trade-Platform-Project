@@ -7,6 +7,7 @@ import com.example.olditemtradeplatform.like.domain.Like;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -24,11 +25,10 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(nullable = false, unique = true, updatable = false, length = 20)
     String userId;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     String password;
 
     @Column(nullable = false)
@@ -37,12 +37,10 @@ public class Member {
     @Column(nullable = false)
     LocalDate suspendUntil;
 
-    @NotBlank
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 10)
     String nickname;
 
-    @Email
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 500)
     String email;
 
     @OneToMany(mappedBy = "writer", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -32,7 +32,7 @@ public class ReportOfPost {
     @JoinColumn(name = "reporter_id", nullable = false)
     Member reporter;
 
-    @NotBlank
+    @Lob
     @Column(nullable = false)
     String content;
 

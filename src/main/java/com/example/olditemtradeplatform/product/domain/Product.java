@@ -20,8 +20,7 @@ public class Product {
     @JoinColumn(name = "post_id", nullable = false)
     Post post;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     String name;
 
     @Column(nullable = false)

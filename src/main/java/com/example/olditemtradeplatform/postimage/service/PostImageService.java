@@ -19,7 +19,7 @@ public class PostImageService {
     private final PostRepository postRepository;
 
     @Transactional
-    public PostImageResponseDTO create(Long postId, PostImageRequestDTO dto) {
+    public PostImageResponseDTO createPostImage(Long postId, PostImageRequestDTO dto) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
@@ -30,14 +30,14 @@ public class PostImageService {
     }
 
     @Transactional(readOnly = true)
-    public PostImageResponseDTO find(Long postId, Long imageAt) {
+    public PostImageResponseDTO findPostImage(Long postId, Long imageAt) {
         PostImage postImage = postImageRepository.findById(new PostImageId(postId, imageAt))
                 .orElseThrow(() -> new IllegalArgumentException("PostImage not found"));
         return PostImageResponseDTO.from(postImage);
     }
 
     @Transactional
-    public void delete(Long postId, Long imageAt) {
+    public void deletePostImage(Long postId, Long imageAt) {
         postImageRepository.deleteById(new PostImageId(postId, imageAt));
     }
 }

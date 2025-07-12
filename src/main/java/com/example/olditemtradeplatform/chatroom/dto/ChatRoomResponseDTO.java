@@ -10,14 +10,14 @@ import lombok.*;
 public class ChatRoomResponseDTO {
 
     private Long roomId;
-    private String participant1Nickname;
-    private String participant2Nickname;
+    private String member1Nickname;
+    private String member2Nickname;
 
     public static ChatRoomResponseDTO from(ChatRoom chatRoom) {
         return ChatRoomResponseDTO.builder()
                 .roomId(chatRoom.getId())
-                .participant1Nickname(chatRoom.getMember1().getNickname())
-                .participant2Nickname(chatRoom.getMember2().getNickname())
+                .member1Nickname(chatRoom.getMember1().getNickname())
+                .member2Nickname(chatRoom.getMember2().getNickname())
                 .build();
     }
 }

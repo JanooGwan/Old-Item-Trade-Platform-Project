@@ -22,7 +22,7 @@ public class ReportOfPostService {
     private final PostRepository postRepository;
 
     @Transactional
-    public ReportOfPostResponseDTO create(Long postId, Long reporterId, ReportOfPostRequestDTO dto) {
+    public ReportOfPostResponseDTO createReport(Long postId, Long reporterId, ReportOfPostRequestDTO dto) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
         Member reporter = memberRepository.findById(reporterId)
@@ -35,14 +35,14 @@ public class ReportOfPostService {
     }
 
     @Transactional(readOnly = true)
-    public ReportOfPostResponseDTO find(Long postId, Long reporterId) {
+    public ReportOfPostResponseDTO findReport(Long postId, Long reporterId) {
         ReportOfPost report = reportOfPostRepository.findById(new ReportOfPostId(postId, reporterId))
                 .orElseThrow(() -> new IllegalArgumentException("Report not found"));
         return ReportOfPostResponseDTO.from(report);
     }
 
     @Transactional
-    public void delete(Long postId, Long reporterId) {
+    public void deleteReport(Long postId, Long reporterId) {
         reportOfPostRepository.deleteById(new ReportOfPostId(postId, reporterId));
     }
 }

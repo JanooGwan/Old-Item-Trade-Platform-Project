@@ -4,6 +4,7 @@ import com.example.olditemtradeplatform.chatroom.domain.ChatRoom;
 import com.example.olditemtradeplatform.member.domain.Member;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -31,7 +32,7 @@ public class ChatMessage {
     ChatRoom chatroom;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     String content;
 
     @CreatedDate

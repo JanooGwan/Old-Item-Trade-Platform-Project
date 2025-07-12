@@ -4,6 +4,8 @@ import com.example.olditemtradeplatform.post.domain.Post;
 import com.example.olditemtradeplatform.product.domain.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -13,12 +15,15 @@ import lombok.*;
 public class ProductRequestDTO {
 
     @NotBlank
+    @Size(min = 1, max = 100)
     private String name;
 
-    @NotNull
+    @Positive(message = "가격은 0 이상이어야 합니다.")
+    @NotNull(message = "수량은 필수로 입력해야 합니다.")
     private Long count;
 
-    @NotNull
+    @Positive(message = "가격은 0 이상이어야 합니다.")
+    @NotNull(message = "가격은 필수로 입력해야 합니다.")
     private Long price;
 
     public Product toEntity(Post post) {

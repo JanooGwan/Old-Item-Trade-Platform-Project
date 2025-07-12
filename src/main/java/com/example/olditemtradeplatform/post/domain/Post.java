@@ -3,6 +3,7 @@ package com.example.olditemtradeplatform.post.domain;
 import com.example.olditemtradeplatform.postimage.domain.PostImage;
 import com.example.olditemtradeplatform.like.domain.Like;
 import com.example.olditemtradeplatform.member.domain.Member;
+import com.example.olditemtradeplatform.product.domain.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -31,18 +32,19 @@ public class Post {
     Member writer;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     String title;
 
+    @Lob
     @NotBlank
     @Column(nullable = false)
     String content;
 
     @Column(nullable = false)
-    Long likeCount;
+    Long likeCount = 0L;
 
     @Column(nullable = false)
-    Long viewCount;
+    Long viewCount = 0L;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
