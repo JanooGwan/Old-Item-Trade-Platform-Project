@@ -14,6 +14,9 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProductRequestDTO {
 
+    @NotNull(message = "게시글 ID는 필수로 입력해야합니다.")
+    private Long postId;
+
     @NotBlank
     @Size(min = 1, max = 100)
     private String name;

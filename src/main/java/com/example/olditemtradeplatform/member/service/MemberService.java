@@ -5,8 +5,10 @@ import com.example.olditemtradeplatform.member.dto.MemberRegisterRequestDTO;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.olditemtradeplatform.member.dto.MemberUpdateRequestDTO;
 
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public MemberResponseDTO register(MemberRegisterRequestDTO dto, String encodedPassword) {
@@ -35,8 +38,18 @@ public class MemberService {
         return memberRepository.findByUserId(userId);
     }
 
+
     @Transactional
-    public void deleteById(Long id) {
+    public MemberResponseDTO updateMember(Member member, MemberUpdateRequestDTO dto) {
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        member.updateMember(encodedPassword, dto.getEmail(), dto.getNickname());
+        return MemberResponseDTO.from(member);
+    }
+
+
+
+    @Transactional
+    public void deleteMember(Long id) {
         memberRepository.deleteById(id);
     }
 }

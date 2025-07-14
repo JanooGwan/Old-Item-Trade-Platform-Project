@@ -7,37 +7,47 @@ import com.example.olditemtradeplatform.postimage.domain.PostImageId;
 import com.example.olditemtradeplatform.postimage.dto.PostImageRequestDTO;
 import com.example.olditemtradeplatform.postimage.dto.PostImageResponseDTO;
 import com.example.olditemtradeplatform.postimage.repository.PostImageRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class PostImageService {
 
-    private final PostImageRepository postImageRepository;
     private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
+    private final FileStorageService fileStorageService;
 
-    @Transactional
-    public PostImageResponseDTO createPostImage(Long postId, PostImageRequestDTO dto) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+    public PostImageResponseDTO saveImage(PostImageRequestDTO dto) {
 
-        PostImage postImage = dto.toEntity(post);
+        MultipartFile file = dto.getFile();
+
+        String imageUrl = fileStorageService.save(file);
+
+        Post post = postRepository.findById(dto.getPostId())
+                .orElseThrow(() -> new EntityNotFoundException("해당 게시글이 없습니다."));
+
+        Long imageAt = postImageRepository.countByPost(post) + 1;
+
+        PostImage postImage = new PostImage(post, imageAt, imageUrl);
         postImageRepository.save(postImage);
 
         return PostImageResponseDTO.from(postImage);
     }
 
+
     @Transactional(readOnly = true)
-    public PostImageResponseDTO findPostImage(Long postId, Long imageAt) {
-        PostImage postImage = postImageRepository.findById(new PostImageId(postId, imageAt))
+    public PostImageResponseDTO findImage(PostImageId id) {
+        PostImage postImage = postImageRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("PostImage not found"));
         return PostImageResponseDTO.from(postImage);
     }
 
     @Transactional
-    public void deletePostImage(Long postId, Long imageAt) {
-        postImageRepository.deleteById(new PostImageId(postId, imageAt));
+    public void deleteImage(PostImageId id) {
+        postImageRepository.deleteById(id);
     }
 }

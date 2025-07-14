@@ -5,20 +5,13 @@ import com.example.olditemtradeplatform.postimage.domain.PostImage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
-@Builder
+@Setter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PostImageRequestDTO {
 
-    private Long imageAt;
-
-    @NotBlank
-    @Size(max = 255)
-    private String imageUrl;
-
-    public PostImage toEntity(Post post) {
-        return new PostImage(post, imageAt, imageUrl);
-    }
+    Long postId;
+    MultipartFile file;
 }

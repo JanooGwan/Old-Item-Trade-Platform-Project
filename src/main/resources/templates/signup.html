@@ -1,0 +1,68 @@
+<!-- signup.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입 - 대학교 중고거래마켓</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+    <h2 class="text-2xl font-bold text-center text-orange-500 mb-6">회원가입</h2>
+    <form id="signup-form" class="space-y-4">
+        <div>
+            <label for="userId" class="block text-sm font-medium text-gray-700">아이디</label>
+            <input type="text" id="userId" name="userId" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">비밀번호</label>
+            <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <div>
+            <label for="nickname" class="block text-sm font-medium text-gray-700">닉네임</label>
+            <input type="text" id="nickname" name="nickname" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">이메일</label>
+            <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-md">회원가입</button>
+    </form>
+    <p class="mt-4 text-center text-sm text-gray-600">
+        이미 계정이 있으신가요? <a href="/login" class="text-orange-500 hover:underline">로그인</a>
+    </p>
+</div>
+
+<script>
+    document.getElementById("signup-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const userId = document.getElementById("userId").value;
+        const password = document.getElementById("password").value;
+        const nickname = document.getElementById("nickname").value;
+        const email = document.getElementById("email").value;
+
+        fetch("/auths/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId, password, nickname, email }),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("회원가입 실패");
+                return res.text();
+            })
+            .then(() => {
+                alert("회원가입이 완료되었습니다! 로그인 해주세요.");
+                window.location.href = "/login.html";
+            })
+            .catch((err) => {
+                alert("회원가입에 실패했습니다. 입력값을 확인해주세요.");
+                console.error(err);
+            });
+    });
+</script>
+</body>
+</html>

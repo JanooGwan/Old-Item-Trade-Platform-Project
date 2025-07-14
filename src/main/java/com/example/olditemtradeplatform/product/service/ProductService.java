@@ -18,8 +18,8 @@ public class ProductService {
     private final PostRepository postRepository;
 
     @Transactional
-    public ProductResponseDTO createProduct(Long postId, ProductRequestDTO dto) {
-        Post post = postRepository.findById(postId)
+    public ProductResponseDTO createProduct(ProductRequestDTO dto) {
+        Post post = postRepository.findById(dto.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
 
         Product product = dto.toEntity(post);
@@ -27,6 +27,7 @@ public class ProductService {
 
         return ProductResponseDTO.from(product);
     }
+
 
     @Transactional(readOnly = true)
     public ProductResponseDTO findProduct(Long productId) {

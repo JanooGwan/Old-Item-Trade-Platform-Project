@@ -34,7 +34,7 @@ public class Member {
     @Column(nullable = false)
     boolean isSuspended;
 
-    @Column(nullable = false)
+    @Column
     LocalDate suspendUntil;
 
     @Column(nullable = false, unique = true, length = 10)
@@ -62,6 +62,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     Role role;
 
+
+    public void updateMember(String encryptedPassword, String email, String nickname) {
+        this.password = encryptedPassword;
+        this.email = email;
+        this.nickname = nickname;
+    }
 
     public boolean isMemberSuspended(Member member) {
         return member.isSuspended() && member.getSuspendUntil().isAfter(LocalDate.now());

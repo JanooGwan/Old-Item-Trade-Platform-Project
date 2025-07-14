@@ -23,11 +23,11 @@ public class ChatMessage {
     ChatMessageId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("senderId")
     @JoinColumn(name = "sender_id", nullable = false)
     Member sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("chatRoomId")
     @JoinColumn(name = "chatroom_id", nullable = false)
     ChatRoom chatroom;
 
@@ -39,7 +39,7 @@ public class ChatMessage {
     @Column(nullable = false, updatable = false)
     LocalDateTime sentDate;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, insertable = false)
     Long sentAt;
 
     @Column(nullable = false)

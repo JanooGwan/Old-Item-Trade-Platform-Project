@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class PostViewResponseDTO {
+public class PostResponseDTO {
 
     String writerName;
     String title;
@@ -18,8 +18,8 @@ public class PostViewResponseDTO {
     LocalDateTime createDate;
     LocalDateTime modifiedDate;
 
-    public static PostViewResponseDTO from(Post post) {
-        return PostViewResponseDTO.builder()
+    public static PostResponseDTO from(Post post) {
+        return PostResponseDTO.builder()
                 .writerName(post.getWriter().getNickname())
                 .title(post.getTitle())
                 .content(post.getContent())

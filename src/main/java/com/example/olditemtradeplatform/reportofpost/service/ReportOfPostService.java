@@ -9,9 +9,12 @@ import com.example.olditemtradeplatform.reportofpost.domain.ReportOfPostId;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostRequestDTO;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostResponseDTO;
 import com.example.olditemtradeplatform.reportofpost.repository.ReportOfPostRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,17 +24,29 @@ public class ReportOfPostService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
-    @Transactional
-    public ReportOfPostResponseDTO createReport(Long postId, Long reporterId, ReportOfPostRequestDTO dto) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
-        Member reporter = memberRepository.findById(reporterId)
-                .orElseThrow(() -> new IllegalArgumentException("Reporter not found"));
 
-        ReportOfPost report = dto.toEntity(post, reporter);
+    @Transactional
+    public ReportOfPostResponseDTO reportPost(ReportOfPostRequestDTO dto, Member reporter) {
+        Post post = postRepository.findById(dto.getPostId())
+                .orElseThrow(() -> new EntityNotFoundException("해당 게시글이 없습니다."));
+
+        ReportOfPostId id = new ReportOfPostId(post.getId(), reporter.getId());
+
+        if (reportOfPostRepository.existsById(id)) {
+            throw new IllegalStateException("이미 이 게시글을 신고했습니다.");
+        }
+
+        ReportOfPost report = new ReportOfPost(post, reporter, dto.getContent());
         reportOfPostRepository.save(report);
 
         return ReportOfPostResponseDTO.from(report);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReportOfPostResponseDTO> getReports() {
+        return reportOfPostRepository.findAll().stream()
+                .map(ReportOfPostResponseDTO::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)

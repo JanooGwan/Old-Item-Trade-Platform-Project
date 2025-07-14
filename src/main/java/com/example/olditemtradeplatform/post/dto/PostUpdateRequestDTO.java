@@ -28,12 +28,4 @@ public class PostUpdateRequestDTO {
 
     @NotNull(message = "거래 상황을 지정해주어야 합니다.")
     DealStatus dealStatus;
-
-    public Post toEntity() {
-        return Post.builder()
-                .content(this.content)
-                .dealWay(this.dealWay)
-                .dealStatus(this.dealStatus)
-                .build();
-    }
 }

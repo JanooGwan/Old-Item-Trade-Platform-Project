@@ -40,9 +40,11 @@ public class Post {
     @Column(nullable = false)
     String content;
 
+    @Builder.Default
     @Column(nullable = false)
     Long likeCount = 0L;
 
+    @Builder.Default
     @Column(nullable = false)
     Long viewCount = 0L;
 
