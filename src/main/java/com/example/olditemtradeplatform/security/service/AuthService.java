@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private static final int SESSION_TIMEOUT_SECONDS = 1800;
+    private static final int SESSION_TIMEOUT_SECONDS = 1900;
 
     @Transactional
     public void login(LoginRequestDTO request, HttpServletRequest httpRequest) {
