@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>홈 - 중고거래 플랫폼</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- ✅ 로컬 Tailwind CSS 파일 사용 -->
+    <link href="/css/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
 <header class="bg-white shadow-md p-4 flex justify-between items-center">
     <h1 class="text-2xl font-bold text-orange-500">중고마켓</h1>
-    <div class="space-x-4">
-        <a href="/login.html" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
-        <a href="/signup.html" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
-    </div>
+    <div id="nav-right" class="space-x-4"></div>
 </header>
 
 <main class="flex-1 container mx-auto px-4 py-6">
-    <h2 class="text-xl font-semibold mb-4">최근 게시글</h2>
-    <div id="post-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">최근 게시글</h2>
+        <button id="write-btn" class="px-4 py-2 rounded font-semibold">게시글 쓰기</button>
     </div>
+    <div id="post-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </main>
 
 <footer class="bg-white shadow-inner p-4 text-center text-sm text-gray-500">
@@ -27,24 +27,65 @@
 </footer>
 
 <script>
+    function logout() {
+        fetch("/auths/logout", { method: "POST" })
+            .then(() => location.href = "/home")
+            .catch(err => console.error("로그아웃 실패:", err));
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("write-btn");
+
+        // ✅ 게시글 데이터 먼저 불러오기
         fetch("/api/posts")
             .then(response => response.json())
             .then(data => {
                 const postList = document.getElementById("post-list");
                 postList.innerHTML = data.map(post => `
-            <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
-              <h3 class="text-lg font-bold mb-1">${post.title}</h3>
-              <p class="text-sm text-gray-600">${post.content.slice(0, 60)}...</p>
-              <p class="mt-2 text-sm text-gray-400">조회수 ${post.viewCount}</p>
-              <a href="/post-detail.html?id=${post.id}" class="block mt-3 text-orange-500 hover:underline text-sm">자세히 보기</a>
-            </div>
-          `).join("");
+                    <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
+                        <h3 class="text-lg font-bold mb-1">${post.title}</h3>
+                        <p class="text-sm text-gray-600">${post.content.slice(0, 60)}...</p>
+                        <p class="mt-2 text-sm text-gray-400">조회수 ${post.viewCount}</p>
+                        <a href="/post-detail?id=${post.id}" class="block mt-3 text-orange-500 hover:underline text-sm">자세히 보기</a>
+                    </div>
+                `).join("");
             })
             .catch(err => {
                 console.error("게시글 불러오기 실패:", err);
             });
+
+        // ✅ 로그인 여부 확인 및 버튼 상태 설정
+        fetch("/api/members/me")
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                // 로그인 상태
+                document.getElementById("nav-right").innerHTML = `
+                    <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
+                    <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
+                `;
+
+                // ✅ 버튼 활성화 및 색상 설정
+                btn.className = "bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded font-semibold";
+                btn.disabled = false;
+                btn.onclick = () => location.href = "/writepost";
+            })
+            .catch(() => {
+                // 비로그인 상태
+                document.getElementById("nav-right").innerHTML = `
+                    <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
+                    <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
+                `;
+
+                // ✅ 버튼 비활성화 및 회색 스타일
+                btn.className = "bg-gray-300 text-gray-500 px-4 py-2 rounded font-semibold opacity-50 cursor-not-allowed";
+                btn.disabled = true;
+                btn.onclick = () => location.href = "/login";
+            });
     });
 </script>
+
 </body>
 </html>

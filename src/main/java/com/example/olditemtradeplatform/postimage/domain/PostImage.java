@@ -3,12 +3,12 @@ package com.example.olditemtradeplatform.postimage.domain;
 import com.example.olditemtradeplatform.post.domain.Post;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostImage {
 
@@ -20,7 +20,6 @@ public class PostImage {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @NotBlank
     @Column(name = "image_url", nullable = false, unique = true)
     private String imageUrl;
 
