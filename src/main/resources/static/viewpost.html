@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>게시글 상세</title>
+    <link href="/css/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 min-h-screen">
+<div class="max-w-3xl mx-auto py-10 px-6 bg-white shadow rounded relative">
+
+    <div class="absolute top-4 right-6 flex items-center gap-4">
+        <button onclick="location.href='/home'" class="text-sm text-blue-600 hover:underline">🏠 홈</button>
+        <div class="flex flex-col items-center">
+            <button id="like-btn">
+                <span id="heart-icon" class="text-2xl">♡</span>
+            </button>
+            <span id="like-count" class="text-sm text-gray-500">0</span>
+        </div>
+    </div>
+
+    <h1 id="post-title" class="text-2xl font-bold text-orange-500 mb-2">제목</h1>
+    <p id="post-time" class="text-xs text-gray-400 mb-4">작성 시간</p>
+    <p id="post-content" class="text-gray-800 mb-4">내용</p>
+
+    <div id="image-gallery" class="flex gap-2 mb-4"></div>
+
+    <p class="text-sm text-gray-500 mb-1">조회수: <span id="view-count">0</span></p>
+    <p class="text-sm text-gray-500 mb-1">구매/판매: <span id="buy-or-sale"></span></p>
+    <p class="text-sm text-gray-500 mb-1">거래방법: <span id="deal-way"></span></p>
+    <p class="text-sm text-gray-500">가격: <span id="product-price"></span>원 | 수량: <span id="product-count"></span></p>
+
+    <div id="post-actions" class="mt-6 flex gap-3 hidden">
+        <button id="edit-btn" class="bg-blue-500 text-white px-4 py-2 rounded">수정</button>
+        <button id="delete-btn" class="bg-red-500 text-white px-4 py-2 rounded">삭제</button>
+    </div>
+</div>
+
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+    <div class="relative">
+        <img id="modal-image" src="" class="max-w-3xl max-h-[80vh] rounded shadow-lg" />
+        <button onclick="closeModal()" class="absolute top-2 right-2 text-white text-xl">✕</button>
+    </div>
+</div>
+
+<script>
+    const postId = window.location.pathname.split("/").pop();
+
+    function openModal(imageUrl) {
+        document.getElementById("modal-image").src = imageUrl;
+        document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+    }
+
+    function timeAgo(dateStr) {
+        const now = new Date();
+        const date = new Date(dateStr);
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return '방금 전';
+        if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+        return `${Math.floor(diff / 86400)}일 전`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch(`/api/posts/${postId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("post-title").textContent = data.title;
+                document.getElementById("post-content").textContent = data.content;
+                document.getElementById("view-count").textContent = data.viewCount ?? 0;
+                document.getElementById("buy-or-sale").textContent = data.buyOrSale === 'BUY' ? '구매' : '판매';
+                document.getElementById("deal-way").textContent = data.dealWay === 'DIRECT' ? '직거래' : '택배';
+                document.getElementById("product-price").textContent = data.price ?? "-";
+                document.getElementById("product-count").textContent = data.count ?? "-";
+                document.getElementById("like-count").textContent = data.likeCount ?? 0;
+                document.getElementById("post-time").textContent = timeAgo(data.createDate);
+
+                const heartIcon = document.getElementById("heart-icon");
+                if (data.liked === true) {
+                    heartIcon.textContent = "❤️";
+                }
+
+                const gallery = document.getElementById("image-gallery");
+                if (Array.isArray(data.images)) {
+                    data.images.forEach(url => {
+                        const wrapper = document.createElement("div");
+                        wrapper.className = "relative w-24 h-24";
+
+                        const img = document.createElement("img");
+                        img.src = url;
+                        img.alt = "post image";
+                        img.className = "w-full h-full object-cover rounded border";
+
+                        const zoomBtn = document.createElement("button");
+                        zoomBtn.innerText = "🔍";
+                        zoomBtn.className = "absolute bottom-1 right-1 text-sm bg-white rounded px-1 shadow";
+                        zoomBtn.onclick = () => openModal(url);
+
+                        wrapper.appendChild(img);
+                        wrapper.appendChild(zoomBtn);
+                        gallery.appendChild(wrapper);
+                    });
+                }
+
+                if (data.author === true) {
+                    document.getElementById("post-actions").classList.remove("hidden");
+
+                    document.getElementById("delete-btn").addEventListener("click", () => {
+                        if (confirm("정말 삭제하시겠습니까?")) {
+                            fetch(`/api/posts/${postId}`, { method: "DELETE" })
+                                .then(res => {
+                                    if (!res.ok) throw new Error();
+                                    alert("삭제 완료되었습니다.");
+                                    location.href = "/home";
+                                })
+                                .catch(() => alert("삭제 중 오류가 발생했습니다."));
+                        }
+                    });
+
+                    document.getElementById("edit-btn").addEventListener("click", () => {
+                        location.href = `/editpost/${postId}`;
+                    });
+                }
+
+                const likeBtn = document.getElementById("like-btn");
+                const likeCountSpan = document.getElementById("like-count");
+
+                likeBtn.addEventListener("click", () => {
+                    fetch(`/likes/${postId}`, { method: 'POST' })
+                        .then(res => res.json())
+                        .then(data => {
+                            heartIcon.textContent = data.liked ? "❤️" : "♡";
+                            likeCountSpan.textContent = data.likeCount;
+                        })
+                        .catch(() => alert("좋아요 처리 실패"));
+                });
+            })
+            .catch(() => {
+                alert("게시글 정보를 불러오는 데 실패했습니다.");
+            });
+    });
+</script>
+</body>
+</html>

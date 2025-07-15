@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+    <link href="/css/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 min-h-screen flex justify-center items-center">
+
+<div class="bg-white p-8 rounded shadow-md w-full max-w-xl relative">
+
+    <!-- ✅ 홈 / 뒤로가기 버튼 -->
+    <div class="absolute top-4 right-4 flex gap-4">
+        <button onclick="location.href='/home'" class="text-sm text-blue-600 hover:underline">🏠 홈</button>
+        <button id="back-btn" class="text-sm text-blue-600 hover:underline">🔙 뒤로가기</button>
+    </div>
+
+    <h2 class="text-2xl font-bold text-orange-500 mb-6 text-center">게시글 수정</h2>
+
+    <form id="edit-post-form" class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">내용</label>
+            <textarea id="content" rows="5" class="mt-1 w-full border rounded px-3 py-2" required></textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">거래 방법</label>
+            <select id="deal-way" class="mt-1 w-full border rounded px-3 py-2">
+                <option value="DIRECT">직거래</option>
+                <option value="DELIVERY">택배</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">거래 상태</label>
+            <select id="deal-status" class="mt-1 w-full border rounded px-3 py-2">
+                <option value="AVAILABLE">거래 가능</option>
+                <option value="RESERVED">예약 중</option>
+                <option value="COMPLETED">거래 완료</option>
+            </select>
+        </div>
+
+        <div class="flex justify-end gap-2">
+            <button type="button" onclick="history.back()" class="px-4 py-2 bg-gray-300 rounded">취소</button>
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">수정</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const postId = window.location.pathname.split("/").pop();
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch(`/api/posts/${postId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("content").value = data.content;
+                document.getElementById("deal-way").value = data.dealWay;
+                document.getElementById("deal-status").value = data.dealStatus;
+            })
+            .catch(() => alert("게시글 정보를 불러오는 데 실패했습니다."));
+    });
+
+    // ✅ 뒤로가기 버튼 → 게시글 상세로 이동
+    document.getElementById("back-btn").addEventListener("click", () => {
+        location.href = `/post/${postId}`;
+    });
+
+    document.getElementById("edit-post-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const dto = {
+            content: document.getElementById("content").value,
+            dealWay: document.getElementById("deal-way").value,
+            dealStatus: document.getElementById("deal-status").value
+        };
+
+        fetch(`/api/posts/${postId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dto)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error();
+                alert("게시글이 수정되었습니다.");
+                location.href = `/post/${postId}`;
+            })
+            .catch(() => alert("수정 중 오류가 발생했습니다."));
+    });
+</script>
+
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>회원가입 - 대학교 중고거래마켓</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/css/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
@@ -26,10 +26,10 @@
             <label for="email" class="block text-sm font-medium text-gray-700">이메일</label>
             <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
         </div>
-        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-md">회원가입</button>
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-black py-2 px-4 rounded-md">회원가입</button>
     </form>
     <p class="mt-4 text-center text-sm text-gray-600">
-        이미 계정이 있으신가요? <a href="/login.html" class="text-orange-500 hover:underline">로그인</a>
+        이미 계정이 있으신가요? <a href="/login" class="text-orange-500 hover:underline">로그인</a>
     </p>
 </div>
 
@@ -55,7 +55,7 @@
             })
             .then(() => {
                 alert("회원가입이 완료되었습니다! 로그인 해주세요.");
-                window.location.href = "/login.html";
+                window.location.href = "/login";
             })
             .catch((err) => {
                 alert("회원가입에 실패했습니다. 입력값을 확인해주세요.");

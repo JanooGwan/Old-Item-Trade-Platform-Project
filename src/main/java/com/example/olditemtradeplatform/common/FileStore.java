@@ -1,11 +1,15 @@
 package com.example.olditemtradeplatform.common;
 
+import com.example.olditemtradeplatform.post.domain.Post;
+import com.example.olditemtradeplatform.postimage.domain.PostImage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -15,7 +19,6 @@ public class FileStore {
     private String uploadPath;
 
     public String saveFile(MultipartFile file) throws IOException {
-        // 🔥 절대 경로로 변환
         File dir = new File(uploadPath).getAbsoluteFile();
         if (!dir.exists()) {
             boolean created = dir.mkdirs();
@@ -29,6 +32,6 @@ public class FileStore {
         File target = new File(dir, savedName);
         file.transferTo(target);
 
-        return "/uploads/" + savedName;  // 브라우저 접근용 URL
+        return "/uploads/" + savedName;
     }
 }

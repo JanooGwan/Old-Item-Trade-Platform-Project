@@ -2,6 +2,8 @@ package com.example.olditemtradeplatform.common;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @Controller
 public class PageController {
@@ -28,5 +30,15 @@ public class PageController {
     @GetMapping("/writepost")
     public String writePostPage() {
         return "writepost";
+    }
+
+    @GetMapping("/post/{postId}")
+    public String viewPost(@PathVariable Long postId) {
+        return "forward:/viewpost.html";
+    }
+
+    @GetMapping("/editpost/{postId}")
+    public String editPost(@PathVariable Long postId) {
+        return "forward:/editpost.html";
     }
 }

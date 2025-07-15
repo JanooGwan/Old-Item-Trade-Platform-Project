@@ -3,7 +3,6 @@ package com.example.olditemtradeplatform.post.dto;
 import com.example.olditemtradeplatform.post.domain.BuyOrSale;
 import com.example.olditemtradeplatform.post.domain.DealStatus;
 import com.example.olditemtradeplatform.post.domain.DealWay;
-import com.example.olditemtradeplatform.post.domain.Post;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

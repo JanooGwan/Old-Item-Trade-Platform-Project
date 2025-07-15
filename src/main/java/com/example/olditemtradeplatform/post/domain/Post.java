@@ -56,13 +56,16 @@ public class Post {
     @Column(nullable = false)
     LocalDateTime modifiedDate;
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     List<PostImage> postImages = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     List<Product> products = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Like> likes = new ArrayList<>();
 
     @Column(nullable = false)
@@ -77,9 +80,25 @@ public class Post {
     @Enumerated(EnumType.STRING)
     BuyOrSale buyOrSale;
 
+
     public void updatePost(String content, DealWay dealWay, DealStatus dealStatus) {
         this.content = content;
         this.dealWay = dealWay;
         this.dealStatus = dealStatus;
     }
+
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount = (this.likeCount == null) ? 1 : this.likeCount + 1;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.likeCount != null && this.likeCount > 0) {
+            this.likeCount -= 1;
+        }
+    }
+
 }

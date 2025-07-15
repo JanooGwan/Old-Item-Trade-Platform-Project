@@ -1,11 +1,38 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>홈 - 중고거래 플랫폼</title>
-    <!-- ✅ 로컬 Tailwind CSS 파일 사용 -->
-    <link href="/css/tailwind.min.css" rel="stylesheet">
+    <link href="/css/tailwind.min.css" rel="stylesheet" />
+    <style>
+        #image-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        #image-modal img {
+            max-height: 80vh;
+            max-width: 80vw;
+        }
+        #image-modal .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border-radius: 9999px;
+            width: 2rem;
+            height: 2rem;
+            font-weight: bold;
+            text-align: center;
+            line-height: 2rem;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
@@ -22,6 +49,11 @@
     <div id="post-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </main>
 
+<div id="image-modal" class="hidden fixed inset-0 flex items-center justify-center">
+    <div class="close-btn" onclick="closeImageModal()">X</div>
+    <img id="modal-img" src="" alt="확대 이미지" class="rounded shadow-lg" />
+</div>
+
 <footer class="bg-white shadow-inner p-4 text-center text-sm text-gray-500">
     &copy; 2025 대학교 중고거래마켓. All rights reserved.
 </footer>
@@ -33,20 +65,53 @@
             .catch(err => console.error("로그아웃 실패:", err));
     }
 
+    function openImageModal(url) {
+        const modal = document.getElementById("image-modal");
+        const img = document.getElementById("modal-img");
+        img.src = url;
+        modal.classList.remove("hidden");
+    }
+
+    function closeImageModal() {
+        const modal = document.getElementById("image-modal");
+        modal.classList.add("hidden");
+    }
+
+    function timeAgo(dateStr) {
+        if (!dateStr) return '';
+        const now = new Date();
+        const date = new Date(dateStr);
+        if (isNaN(date)) return '';
+        const diff = Math.floor((now - date) / 1000);
+        if (diff < 60) return '방금 전';
+        if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+        return `${Math.floor(diff / 86400)}일 전`;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         const btn = document.getElementById("write-btn");
 
-        // ✅ 게시글 데이터 먼저 불러오기
         fetch("/api/posts")
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) return [];
+                    throw new Error("게시글 불러오기 실패");
+                }
+                return response.json();
+            })
             .then(data => {
+                if (!Array.isArray(data)) return;
                 const postList = document.getElementById("post-list");
+                if (!postList) return;
+
                 postList.innerHTML = data.map(post => `
                     <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
+                        <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" alt="썸네일 이미지" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
                         <h3 class="text-lg font-bold mb-1">${post.title}</h3>
-                        <p class="text-sm text-gray-600">${post.content.slice(0, 60)}...</p>
-                        <p class="mt-2 text-sm text-gray-400">조회수 ${post.viewCount}</p>
-                        <a href="/post-detail?id=${post.id}" class="block mt-3 text-orange-500 hover:underline text-sm">자세히 보기</a>
+                        <p class="text-sm text-gray-400">${timeAgo(post.createdDate)}</p>
+                        <p class="mt-1 text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
+                        <a href="/post/${post.postId}" class="text-orange-500 hover:underline text-sm">자세히 보기</a>
                     </div>
                 `).join("");
             })
@@ -54,32 +119,27 @@
                 console.error("게시글 불러오기 실패:", err);
             });
 
-        // ✅ 로그인 여부 확인 및 버튼 상태 설정
         fetch("/api/members/me")
             .then(res => {
                 if (!res.ok) throw new Error();
                 return res.json();
             })
             .then(data => {
-                // 로그인 상태
                 document.getElementById("nav-right").innerHTML = `
                     <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
                     <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
                 `;
 
-                // ✅ 버튼 활성화 및 색상 설정
                 btn.className = "bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded font-semibold";
                 btn.disabled = false;
                 btn.onclick = () => location.href = "/writepost";
             })
             .catch(() => {
-                // 비로그인 상태
                 document.getElementById("nav-right").innerHTML = `
                     <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
                     <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
                 `;
 
-                // ✅ 버튼 비활성화 및 회색 스타일
                 btn.className = "bg-gray-300 text-gray-500 px-4 py-2 rounded font-semibold opacity-50 cursor-not-allowed";
                 btn.disabled = true;
                 btn.onclick = () => location.href = "/login";

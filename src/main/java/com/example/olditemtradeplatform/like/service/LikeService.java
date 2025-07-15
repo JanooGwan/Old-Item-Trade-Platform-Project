@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 public class LikeService {
@@ -44,5 +43,37 @@ public class LikeService {
     @Transactional
     public void deleteLike(Long postId, Long memberId) {
         likeRepository.deleteById(new LikeId(postId, memberId));
+    }
+
+    @Transactional
+    public LikeResponseDTO toggleLike(Member member, Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        LikeId likeId = new LikeId(postId, member.getId());
+
+        if (likeRepository.existsById(likeId)) {
+            likeRepository.deleteById(likeId);
+            post.decreaseLikeCount();
+            return LikeResponseDTO.of(postId, member.getId(), false, post.getLikeCount());
+        } else {
+            Like like = new Like(post, member);
+            likeRepository.save(like);
+            post.increaseLikeCount();
+            return LikeResponseDTO.of(postId, member.getId(), true, post.getLikeCount());
+        }
+    }
+
+
+
+    @Transactional(readOnly = true)
+    public int countLikes(Long postId) {
+        return likeRepository.countByPostId(postId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isPostLikedByMember(Long postId, Member member) {
+        LikeId likeId = new LikeId(postId, member.getId());
+        return likeRepository.existsById(likeId);
     }
 }

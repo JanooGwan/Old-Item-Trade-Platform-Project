@@ -5,4 +5,6 @@ import com.example.olditemtradeplatform.like.domain.LikeId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LikeRepository extends JpaRepository<Like, LikeId> {
+    int countByPostId(Long postId);
+    boolean existsById(LikeId id);
 }

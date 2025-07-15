@@ -2,7 +2,9 @@ package com.example.olditemtradeplatform.post.controller;
 
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.post.dto.PostCreateRequestDTO;
-import com.example.olditemtradeplatform.post.dto.PostResponseDTO;
+import com.example.olditemtradeplatform.post.dto.PostDetailResponseDTO;
+import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
+import com.example.olditemtradeplatform.post.dto.PostUpdateRequestDTO;
 import com.example.olditemtradeplatform.post.service.PostService;
 import com.example.olditemtradeplatform.product.dto.ProductRequestDTO;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
@@ -21,8 +23,22 @@ public class PostController {
 
     private final PostService postService;
 
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDetailResponseDTO> getPost(@PathVariable Long postId, Authentication authentication) {
+        PostDetailResponseDTO post = postService.getPost(postId, authentication);
+        return ResponseEntity.ok(post);
+    }
+
+
+    @GetMapping
+    public ResponseEntity<List<PostPreviewResponseDTO>> getPosts() {
+        List<PostPreviewResponseDTO> posts = postService.getPosts();
+        return ResponseEntity.ok(posts);
+    }
+
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<PostResponseDTO> createPost(
+    public ResponseEntity<PostDetailResponseDTO> createPost(
             @RequestPart("post") PostCreateRequestDTO postRequestDto,
             @RequestPart("product") ProductRequestDTO productRequestDto,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
@@ -30,21 +46,30 @@ public class PostController {
     ) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Member writer = userDetails.getMember();
-        PostResponseDTO created = postService.createPost(writer, postRequestDto, productRequestDto, images);
+        PostDetailResponseDTO created = postService.createPost(writer, postRequestDto, productRequestDto, images);
         return ResponseEntity.ok(created);
     }
 
+    @PutMapping("/{postId}")
+    public ResponseEntity<Void> updatePost(
+            @PathVariable Long postId,
+            @RequestBody PostUpdateRequestDTO dto,
+            Authentication authentication
+    ) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getMember().getId();
 
-
-    @GetMapping
-    public ResponseEntity<List<PostResponseDTO>> getPosts() {
-        List<PostResponseDTO> posts = postService.getPosts();
-        return ResponseEntity.ok(posts);
+        postService.updatePost(postId, dto, currentUserId);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{postId}")
-    public ResponseEntity<PostResponseDTO> getPost(@PathVariable Long postId) {
-        PostResponseDTO post = postService.getPost(postId);
-        return ResponseEntity.ok(post);
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long currentUserId = userDetails.getMember().getId();
+
+        postService.deletePost(postId, currentUserId);
+        return ResponseEntity.noContent().build();
     }
+
 }

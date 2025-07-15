@@ -28,6 +28,7 @@ public class Like {
     Member member;
 
     public Like(Post post, Member member) {
+        this.id = new LikeId(post.getId(), member.getId());
         this.post = post;
         this.member = member;
     }
