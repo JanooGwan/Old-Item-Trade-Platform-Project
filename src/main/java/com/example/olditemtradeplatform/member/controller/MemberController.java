@@ -21,6 +21,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
+
     @GetMapping("/me")
     public ResponseEntity<MemberResponseDTO> getMyInfo(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

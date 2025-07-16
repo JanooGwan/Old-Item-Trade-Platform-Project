@@ -47,5 +47,4 @@ public class ReportOfPost {
         this.content = content;
         this.reportedDate = LocalDateTime.now();
     }
-
 }

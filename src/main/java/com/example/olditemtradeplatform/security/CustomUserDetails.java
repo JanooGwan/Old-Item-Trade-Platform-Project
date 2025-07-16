@@ -3,9 +3,11 @@ package com.example.olditemtradeplatform.security;
 import com.example.olditemtradeplatform.member.domain.Member;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Getter
 public class CustomUserDetails implements UserDetails {
@@ -18,8 +20,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(() -> member.getRole().name());
+        return List.of(new SimpleGrantedAuthority(member.getRole().toString()));
     }
+
 
     @Override
     public String getPassword() {
@@ -38,6 +41,6 @@ public class CustomUserDetails implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+    @Override public boolean isEnabled() { return !member.isSuspended(); }
 
 }

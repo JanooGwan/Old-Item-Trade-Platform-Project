@@ -1,14 +1,17 @@
 package com.example.olditemtradeplatform.authority.dto;
 
-import com.example.olditemtradeplatform.member.domain.Member;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SuspendRequestDTO {
 
     private Long postId;
     private Long reporterId;
     private LocalDate suspendUntil;
+    private String suspendReason;
 }

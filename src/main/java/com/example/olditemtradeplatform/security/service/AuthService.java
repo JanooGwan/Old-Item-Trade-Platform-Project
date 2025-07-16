@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -33,8 +35,18 @@ public class AuthService {
             Member member = ((CustomUserDetails) authentication.getPrincipal()).getUser();
             createSession(httpRequest, member);
 
+        } catch (DisabledException e) {
+            throw new RuntimeException(e.getMessage(), e);
+
+        } catch (BadCredentialsException e) {
+            throw new RuntimeException("아이디 또는 비밀번호가 일치하지 않습니다.", e);
+
         } catch (AuthenticationException e) {
-            throw new RuntimeException("이메일 또는 비밀번호가 일치하지 않습니다.", e);
+            String message = e.getMessage();
+            if (e.getCause() != null && e.getCause().getMessage() != null) {
+                message = e.getCause().getMessage();
+            }
+            throw new RuntimeException(message, e);
         }
     }
 

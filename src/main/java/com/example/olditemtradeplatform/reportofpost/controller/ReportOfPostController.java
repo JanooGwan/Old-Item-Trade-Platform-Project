@@ -29,10 +29,4 @@ public class ReportOfPostController {
         ReportOfPostResponseDTO result = reportService.reportPost(dto, reporter);
         return ResponseEntity.ok(result);
     }
-
-    @GetMapping
-    public ResponseEntity<List<ReportOfPostResponseDTO>> getReports() {
-        List<ReportOfPostResponseDTO> reports = reportService.getReports();
-        return ResponseEntity.ok(reports);
-    }
 }

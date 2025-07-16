@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class ReportOfPostResponseDTO {
 
     private Long postId;
+    private String title;
     private Long reporterId;
     private String reporterNickname;
     private String content;
@@ -21,6 +22,7 @@ public class ReportOfPostResponseDTO {
     public static ReportOfPostResponseDTO from(ReportOfPost report) {
         return ReportOfPostResponseDTO.builder()
                 .postId(report.getPost().getId())
+                .title(report.getPost().getTitle())
                 .reporterId(report.getReporter().getId())
                 .reporterNickname(report.getReporter().getNickname())
                 .content(report.getContent())

@@ -9,10 +9,12 @@
 <body class="bg-gray-100 min-h-screen">
 <div class="max-w-4xl mx-auto py-10 px-6 bg-white shadow rounded">
 
-    <div id="mypage-common">
-        <h1 class="text-2xl font-bold text-blue-600 mb-4">마이페이지</h1>
-        <p class="text-gray-600">안녕하세요, <span id="nickname"></span>님!</p>
+    <div id="mypage-common" class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-blue-600">마이페이지</h1>
+        <a href="/home" class="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">홈으로</a>
     </div>
+
+    <p class="text-gray-600 mb-4">안녕하세요, <span id="nickname"></span>님!</p>
 
     <div id="user-section" class="hidden mt-6">
         <h2 class="text-xl font-semibold mb-2">📌 내가 작성한 글</h2>
@@ -25,6 +27,9 @@
     <div id="manager-section" class="hidden mt-6">
         <h2 class="text-xl font-semibold mb-2">🚨 신고 접수된 게시글</h2>
         <ul id="report-list" class="space-y-2"></ul>
+
+        <h2 class="text-xl font-semibold mt-8 mb-2">⛔ 정지된 사용자 목록</h2>
+        <ul id="suspended-members" class="space-y-2"></ul>
     </div>
 
     <div id="admin-section" class="hidden mt-6">
@@ -47,10 +52,10 @@
             .then(res => res.json())
             .then(posts => {
                 const list = document.getElementById("my-posts");
+                if (!Array.isArray(posts)) return;
                 posts.forEach(post => {
                     const html = `📄 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a> (${post.viewCount} 조회, ${post.likeCount} 좋아요)`;
-                    const li = createListItem(html);
-                    list.appendChild(li);
+                    list.appendChild(createListItem(html));
                 });
             });
     }
@@ -60,33 +65,115 @@
             .then(res => res.json())
             .then(posts => {
                 const list = document.getElementById("my-likes");
+                if (!Array.isArray(posts)) return;
                 posts.forEach(post => {
                     const html = `💖 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a>`;
-                    const li = createListItem(html);
-                    list.appendChild(li);
+                    list.appendChild(createListItem(html));
                 });
             });
     }
 
     function loadReports() {
-        fetch("/api/members/me/reports")
+        fetch("/api/manager/post-reports")
             .then(res => res.json())
             .then(reports => {
                 const list = document.getElementById("report-list");
+                if (!Array.isArray(reports)) return;
                 reports.forEach(report => {
-                    const li = createListItem(`🚨 게시글 ID ${report.postId} / 신고자: ${report.reporterNickname}`);
-                    list.appendChild(li);
+                    const html = `🚨 <a href="/post/${report.postId}" class="text-blue-600 hover:underline font-bold">${report.title}</a><br>
+                        신고자: ${report.reporterNickname}<br>
+                        사유: ${report.content}<br>
+                        <button onclick="suspendUser(${report.postId}, ${report.reporterId})" class="bg-red-500 text-white px-2 py-1 rounded mr-2">정지</button>
+                        <button onclick="dismissReport(${report.postId}, ${report.reporterId})" class="bg-gray-400 text-white px-2 py-1 rounded">기각</button>`;
+                    list.appendChild(createListItem(html));
                 });
             });
     }
 
+    function suspendUser(postId, reporterId) {
+        const days = prompt("정지 기간을 입력하세요 (예: 1, 3, 7, 30, 9999[영구정지])");
+        if (!days) return;
+        const reason = prompt("정지 사유를 입력하세요");
+        if (!reason) return;
+
+        const until = new Date();
+        until.setDate(until.getDate() + parseInt(days));
+
+        fetch("/api/manager/suspend", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                postId, reporterId,
+                suspendUntil: until.toISOString().split("T")[0],
+                suspendReason: reason
+            })
+        }).then(() => window.location.reload());
+    }
+
+    function dismissReport(postId, reporterId) {
+        if (!confirm("정말 해당 신고를 기각하시겠습니까?")) return;
+
+        fetch(`/api/manager/post-reports/${postId}/${reporterId}`, {
+            method: "DELETE"
+        }).then(() => window.location.reload());
+    }
+
+    function loadSuspendedMembers() {
+        fetch("/api/manager/suspended-members")
+            .then(res => res.json())
+            .then(members => {
+                const list = document.getElementById("suspended-members");
+                if (!Array.isArray(members)) return;
+                members.forEach(member => {
+                    const html = `👤 ${member.nickName} / 아이디 : ${member.userId} / 정지기한: ${member.suspendUntil || '없음'}<br>
+                    사유: ${member.suspendReason || '없음'}<br>
+                    <button onclick="unsuspend(${member.userId}, '${member.nickName}')" class="bg-blue-500 text-white px-2 py-1 rounded">정지 해제</button>`;
+                    list.appendChild(createListItem(html));
+                });
+            });
+    }
+
+
+    function unsuspend(memberId, nickname) {
+        if (!confirm(`정말 ${nickname} 유저의 정지를 해제하시겠습니까?`)) return;
+
+        fetch(`/api/manager/unsuspend/${memberId}`, { method: "POST" })
+            .then(() => window.location.reload());
+    }
+
     function loadMemberList() {
-        fetch("/api/members/me/members")
+        fetch("/api/admin/members")
             .then(res => res.json())
             .then(members => {
                 const list = document.getElementById("member-list");
+                if (!Array.isArray(members)) return;
                 members.forEach(member => {
-                    const li = createListItem(`👤 ${member.nickname} / 역할: ${member.role}`);
+                    const li = document.createElement("li");
+                    li.className = "px-4 py-2 bg-gray-100 rounded shadow-sm flex justify-between items-center";
+
+                    const label = document.createElement("span");
+                    label.innerText = `👤 ${member.nickname}`;
+
+                    const select = document.createElement("select");
+                    ["NORMAL", "MANAGER", "ADMIN"].forEach(role => {
+                        const option = document.createElement("option");
+                        option.value = role;
+                        option.text = role;
+                        if (member.role === role) option.selected = true;
+                        select.appendChild(option);
+                    });
+
+                    select.className = "ml-4 px-2 py-1 border rounded";
+                    select.onchange = () => {
+                        fetch(`/api/admin/change-role/${member.id}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ role: select.value })
+                        }).then(() => alert("권한이 변경되었습니다."));
+                    };
+
+                    li.appendChild(label);
+                    li.appendChild(select);
                     list.appendChild(li);
                 });
             });
@@ -102,14 +189,15 @@
                     document.getElementById("user-section").classList.remove("hidden");
                     loadMyPosts();
                     loadMyLikes();
-                } else if (member.role === "MANAGER") {
+                } else {
                     document.getElementById("manager-section").classList.remove("hidden");
                     loadReports();
-                } else if (member.role === "ADMIN") {
-                    document.getElementById("manager-section").classList.remove("hidden");
-                    document.getElementById("admin-section").classList.remove("hidden");
-                    loadReports();
-                    loadMemberList();
+                    loadSuspendedMembers();
+
+                    if (member.role === "ADMIN") {
+                        document.getElementById("admin-section").classList.remove("hidden");
+                        loadMemberList();
+                    }
                 }
             })
             .catch(() => alert("로그인 정보를 불러오지 못했습니다."));

@@ -93,38 +93,35 @@
         const btn = document.getElementById("write-btn");
 
         fetch("/api/posts")
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 401) return [];
-                    throw new Error("게시글 불러오기 실패");
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!Array.isArray(data)) return;
-                const postList = document.getElementById("post-list");
-                if (!postList) return;
-
-                postList.innerHTML = data.map(post => `
+            .then(res => res.ok ? res.json() : [])
+            .then(posts => {
+                const list = document.getElementById("post-list");
+                if (!Array.isArray(posts)) return;
+                list.innerHTML = posts.map(post => `
                     <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
-                        <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" alt="썸네일 이미지" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
+                        <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
                         <h3 class="text-lg font-bold mb-1">${post.title}</h3>
                         <p class="text-sm text-gray-400">${timeAgo(post.createdDate)}</p>
                         <p class="mt-1 text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
                         <a href="/post/${post.postId}" class="text-orange-500 hover:underline text-sm">자세히 보기</a>
                     </div>
                 `).join("");
-            })
-            .catch(err => {
-                console.error("게시글 불러오기 실패:", err);
             });
 
         fetch("/api/members/me")
-            .then(res => {
-                if (!res.ok) throw new Error();
-                return res.json();
-            })
+            .then(res => res.ok ? res.json() : null)
             .then(data => {
+                if (!data) {
+                    document.getElementById("nav-right").innerHTML = `
+                        <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
+                        <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
+                    `;
+                    btn.className = "bg-gray-300 text-gray-500 px-4 py-2 rounded font-semibold opacity-50 cursor-not-allowed";
+                    btn.disabled = true;
+                    btn.onclick = () => location.href = "/login";
+                    return;
+                }
+
                 document.getElementById("nav-right").innerHTML = `
                     <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
                     <button onclick="location.href='/mypage/${data.id}'" class="text-sm text-blue-600 hover:underline">마이페이지</button>
@@ -134,20 +131,8 @@
                 btn.className = "bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded font-semibold";
                 btn.disabled = false;
                 btn.onclick = () => location.href = "/writepost";
-            })
-
-            .catch(() => {
-                document.getElementById("nav-right").innerHTML = `
-                    <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
-                    <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
-                `;
-
-                btn.className = "bg-gray-300 text-gray-500 px-4 py-2 rounded font-semibold opacity-50 cursor-not-allowed";
-                btn.disabled = true;
-                btn.onclick = () => location.href = "/login";
             });
     });
 </script>
-
 </body>
 </html>

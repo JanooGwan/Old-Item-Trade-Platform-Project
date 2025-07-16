@@ -34,6 +34,9 @@ public class Member {
     @Column(nullable = false)
     boolean isSuspended;
 
+    @Column(length = 500)
+    String suspendReason;
+
     @Column
     LocalDate suspendUntil;
 
@@ -69,13 +72,25 @@ public class Member {
         this.nickname = nickname;
     }
 
-    public boolean isMemberSuspended(Member member) {
-        return member.isSuspended() && member.getSuspendUntil().isAfter(LocalDate.now());
+    public boolean isSuspendedNow() {
+        return this.isSuspended && this.suspendUntil != null && this.suspendUntil.isAfter(LocalDate.now());
     }
 
+    // 정지 시
+    public void updateSuspendInfo(boolean isSuspended, LocalDate until, String reason) {
+        this.isSuspended = isSuspended;
+        this.suspendUntil = until;
+        this.suspendReason = reason;
+    }
+
+    // 정지 해제 시
     public void updateSuspendInfo(boolean isSuspended, LocalDate until) {
         this.isSuspended = isSuspended;
         this.suspendUntil = until;
+        this.suspendReason = null;
     }
 
+    public void updateRole(Role role) {
+        this.role = role;
+    }
 }

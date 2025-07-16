@@ -38,23 +38,25 @@
             const response = await fetch("/auths/login", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ email, password })
             });
 
             if (!response.ok) {
-                throw new Error("로그인 실패");
+                const errorData = await response.json().catch(() => null);
+                const message = errorData?.message || "로그인에 실패했습니다.";
+                alert(message);
+                return;
             }
 
-            const message = await response.text();
-            alert(message);
             window.location.href = "/home";
         } catch (err) {
-            alert("로그인에 실패했습니다. 이메일 또는 비밀번호를 확인해주세요.");
+            alert("예상치 못한 오류가 발생했습니다.");
             console.error(err);
         }
     });
 </script>
+
 </body>
 </html>
