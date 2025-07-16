@@ -4,6 +4,7 @@ import com.example.olditemtradeplatform.postimage.domain.PostImage;
 import com.example.olditemtradeplatform.like.domain.Like;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.product.domain.Product;
+import com.example.olditemtradeplatform.reportofpost.domain.ReportOfPost;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -63,6 +64,9 @@ public class Post {
     @Builder.Default
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     List<Product> products = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportOfPost> reports = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)

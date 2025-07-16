@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지</title>
+    <link href="/css/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+<div class="max-w-4xl mx-auto py-10 px-6 bg-white shadow rounded">
+
+    <div id="mypage-common">
+        <h1 class="text-2xl font-bold text-blue-600 mb-4">마이페이지</h1>
+        <p class="text-gray-600">안녕하세요, <span id="nickname"></span>님!</p>
+    </div>
+
+    <div id="user-section" class="hidden mt-6">
+        <h2 class="text-xl font-semibold mb-2">📌 내가 작성한 글</h2>
+        <ul id="my-posts" class="mb-6 space-y-2"></ul>
+
+        <h2 class="text-xl font-semibold mb-2">❤️ 좋아요 누른 글</h2>
+        <ul id="my-likes" class="space-y-2"></ul>
+    </div>
+
+    <div id="manager-section" class="hidden mt-6">
+        <h2 class="text-xl font-semibold mb-2">🚨 신고 접수된 게시글</h2>
+        <ul id="report-list" class="space-y-2"></ul>
+    </div>
+
+    <div id="admin-section" class="hidden mt-6">
+        <h2 class="text-xl font-semibold mb-2">👥 전체 회원 목록</h2>
+        <ul id="member-list" class="space-y-2"></ul>
+    </div>
+
+</div>
+
+<script>
+    function createListItem(html) {
+        const li = document.createElement("li");
+        li.innerHTML = html;
+        li.className = "px-4 py-2 bg-gray-100 rounded shadow-sm";
+        return li;
+    }
+
+    function loadMyPosts() {
+        fetch("/api/members/me/posts")
+            .then(res => res.json())
+            .then(posts => {
+                const list = document.getElementById("my-posts");
+                posts.forEach(post => {
+                    const html = `📄 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a> (${post.viewCount} 조회, ${post.likeCount} 좋아요)`;
+                    const li = createListItem(html);
+                    list.appendChild(li);
+                });
+            });
+    }
+
+    function loadMyLikes() {
+        fetch("/api/members/me/likes")
+            .then(res => res.json())
+            .then(posts => {
+                const list = document.getElementById("my-likes");
+                posts.forEach(post => {
+                    const html = `💖 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a>`;
+                    const li = createListItem(html);
+                    list.appendChild(li);
+                });
+            });
+    }
+
+    function loadReports() {
+        fetch("/api/members/me/reports")
+            .then(res => res.json())
+            .then(reports => {
+                const list = document.getElementById("report-list");
+                reports.forEach(report => {
+                    const li = createListItem(`🚨 게시글 ID ${report.postId} / 신고자: ${report.reporterNickname}`);
+                    list.appendChild(li);
+                });
+            });
+    }
+
+    function loadMemberList() {
+        fetch("/api/members/me/members")
+            .then(res => res.json())
+            .then(members => {
+                const list = document.getElementById("member-list");
+                members.forEach(member => {
+                    const li = createListItem(`👤 ${member.nickname} / 역할: ${member.role}`);
+                    list.appendChild(li);
+                });
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("/api/members/me")
+            .then(res => res.json())
+            .then(member => {
+                document.getElementById("nickname").textContent = member.nickname;
+
+                if (member.role === "NORMAL") {
+                    document.getElementById("user-section").classList.remove("hidden");
+                    loadMyPosts();
+                    loadMyLikes();
+                } else if (member.role === "MANAGER") {
+                    document.getElementById("manager-section").classList.remove("hidden");
+                    loadReports();
+                } else if (member.role === "ADMIN") {
+                    document.getElementById("manager-section").classList.remove("hidden");
+                    document.getElementById("admin-section").classList.remove("hidden");
+                    loadReports();
+                    loadMemberList();
+                }
+            })
+            .catch(() => alert("로그인 정보를 불러오지 못했습니다."));
+    });
+</script>
+</body>
+</html>

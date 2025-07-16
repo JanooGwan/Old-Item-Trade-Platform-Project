@@ -1,6 +1,7 @@
 package com.example.olditemtradeplatform.post.controller;
 
 import com.example.olditemtradeplatform.member.domain.Member;
+import com.example.olditemtradeplatform.member.service.MemberService;
 import com.example.olditemtradeplatform.post.dto.PostCreateRequestDTO;
 import com.example.olditemtradeplatform.post.dto.PostDetailResponseDTO;
 import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;

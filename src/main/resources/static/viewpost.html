@@ -34,12 +34,29 @@
         <button id="edit-btn" class="bg-blue-500 text-white px-4 py-2 rounded">수정</button>
         <button id="delete-btn" class="bg-red-500 text-white px-4 py-2 rounded">삭제</button>
     </div>
+
+    <div class="mt-6 flex gap-3">
+        <button id="report-btn" class="bg-red-400 text-white px-4 py-2 rounded">🚨 신고하기</button>
+    </div>
 </div>
 
 <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
     <div class="relative">
         <img id="modal-image" src="" class="max-w-3xl max-h-[80vh] rounded shadow-lg" />
         <button onclick="closeModal()" class="absolute top-2 right-2 text-white text-xl">✕</button>
+    </div>
+</div>
+
+<!-- 🚨 신고 모달 -->
+<div id="report-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+    <div class="bg-white p-6 rounded shadow-lg max-w-md w-full relative">
+        <h2 class="text-xl font-bold mb-4">게시글 신고</h2>
+        <textarea id="report-content" rows="4" placeholder="신고 사유를 입력하세요..." class="w-full border rounded p-2 mb-4"></textarea>
+        <div class="flex justify-end gap-2">
+            <button id="cancel-report" class="text-gray-600 px-3 py-1">취소</button>
+            <button id="submit-report" class="bg-red-500 text-white px-3 py-1 rounded">신고 제출</button>
+        </div>
+        <button onclick="closeReportModal()" class="absolute top-2 right-2 text-xl text-gray-600">✕</button>
     </div>
 </div>
 
@@ -53,6 +70,11 @@
 
     function closeModal() {
         document.getElementById("modal").classList.add("hidden");
+    }
+
+    function closeReportModal() {
+        document.getElementById("report-modal").classList.add("hidden");
+        document.getElementById("report-content").value = "";
     }
 
     function timeAgo(dateStr) {
@@ -142,6 +164,48 @@
             .catch(() => {
                 alert("게시글 정보를 불러오는 데 실패했습니다.");
             });
+
+        // 🚨 신고하기 관련 처리
+        const reportBtn = document.getElementById("report-btn");
+        const reportModal = document.getElementById("report-modal");
+        const reportContent = document.getElementById("report-content");
+        const cancelReport = document.getElementById("cancel-report");
+        const submitReport = document.getElementById("submit-report");
+
+        reportBtn.addEventListener("click", () => {
+            reportModal.classList.remove("hidden");
+        });
+
+        cancelReport.addEventListener("click", () => {
+            closeReportModal();
+        });
+
+        submitReport.addEventListener("click", () => {
+            const content = reportContent.value.trim();
+            if (!content) {
+                alert("신고 사유를 입력해주세요.");
+                return;
+            }
+
+            fetch("/api/post-reports", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ postId, content })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("신고 실패");
+                    return res.json();
+                })
+                .then(data => {
+                    alert("신고가 접수되었습니다.");
+                    closeReportModal();
+                })
+                .catch(err => {
+                    alert(err.message || "신고 처리 중 오류가 발생했습니다.");
+                });
+        });
     });
 </script>
 </body>

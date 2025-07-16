@@ -1,5 +1,6 @@
 package com.example.olditemtradeplatform.post.dto;
 
+import com.example.olditemtradeplatform.post.domain.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,4 +22,17 @@ public class PostPreviewResponseDTO {
     private Long likeCount;
     private String buyOrSale;
     private String thumbnailImageUrl;
+
+    public static PostPreviewResponseDTO from(Post post) {
+        return PostPreviewResponseDTO.builder()
+                .postId(post.getId())
+                .writerName(post.getWriter().getNickname())
+                .title(post.getTitle())
+                .createdDate(post.getCreateDate())
+                .viewCount(post.getViewCount())
+                .likeCount((long) post.getLikes().size())
+                .buyOrSale(post.getBuyOrSale().name())
+                .thumbnailImageUrl(post.getPostImages().isEmpty() ? null : post.getPostImages().get(0).getImageUrl())
+                .build();
+    }
 }

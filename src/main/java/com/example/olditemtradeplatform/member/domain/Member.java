@@ -72,4 +72,10 @@ public class Member {
     public boolean isMemberSuspended(Member member) {
         return member.isSuspended() && member.getSuspendUntil().isAfter(LocalDate.now());
     }
+
+    public void updateSuspendInfo(boolean isSuspended, LocalDate until) {
+        this.isSuspended = isSuspended;
+        this.suspendUntil = until;
+    }
+
 }
