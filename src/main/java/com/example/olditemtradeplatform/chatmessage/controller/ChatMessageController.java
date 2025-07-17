@@ -24,4 +24,15 @@ public class ChatMessageController {
         Long memberId = userDetails.getMember().getId();
         return chatMessageService.getMessagesByRoomId(roomId, memberId);
     }
+
+    @PostMapping("/{sentAt}/read")
+    public void markAsRead(
+            @PathVariable Long roomId,
+            @PathVariable Long sentAt,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long memberId = userDetails.getMember().getId();
+        chatMessageService.markMessagesAsRead(roomId, sentAt, memberId);
+    }
 }
+

@@ -4,12 +4,14 @@ import com.example.olditemtradeplatform.chatmessage.domain.ChatMessage;
 import com.example.olditemtradeplatform.chatmessage.domain.ChatMessageId;
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageRequestDTO;
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageResponseDTO;
+import com.example.olditemtradeplatform.chatmessage.dto.ReadMessageResponseDTO;
 import com.example.olditemtradeplatform.chatmessage.repository.ChatMessageRepository;
 import com.example.olditemtradeplatform.chatroom.domain.ChatRoom;
 import com.example.olditemtradeplatform.chatroom.repository.ChatRoomRepository;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     public ChatMessage saveChatMessage(ChatMessageRequestDTO dto) {
@@ -69,6 +72,31 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("Message not found"));
         return ChatMessageResponseDTO.from(message);
     }
+
+    @Transactional
+    public void markMessagesAsRead(Long chatRoomId, Long sentAt, Long readerId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+        Member reader = memberRepository.findById(readerId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        if (!chatRoom.hasParticipant(reader)) {
+            throw new IllegalArgumentException("해당 채팅방에 접근할 수 없습니다.");
+        }
+
+        List<ChatMessage> unreadMessages = chatMessageRepository
+                .findByChatroomOrderBySentAtAsc(chatRoom).stream()
+                .filter(m -> !m.isRead() && m.getSentAt() <= sentAt && !m.getSender().getId().equals(readerId))
+                .toList();
+
+        unreadMessages.forEach(ChatMessage::updateReadStatus);
+
+        messagingTemplate.convertAndSend(
+                "/topic/chatroom." + chatRoomId,
+                new ReadMessageResponseDTO(chatRoomId, readerId)
+        );
+    }
+
 
     @Transactional
     public void deleteMessage(ChatMessageId id) {

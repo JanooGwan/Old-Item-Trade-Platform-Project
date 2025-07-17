@@ -2,6 +2,7 @@ package com.example.olditemtradeplatform.chat.controller;
 
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageRequestDTO;
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageResponseDTO;
+import com.example.olditemtradeplatform.chatmessage.dto.ReadMessageResponseDTO;
 import com.example.olditemtradeplatform.chatmessage.service.ChatMessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,4 +25,10 @@ public class ChatController {
         String destination = "/topic/chatroom." + responseDTO.getChatRoomId();
         messagingTemplate.convertAndSend(destination, responseDTO);
     }
+
+    @MessageMapping("/chat.read")
+    public void notifyReadStatus(ReadMessageResponseDTO dto) {
+        messagingTemplate.convertAndSend("/topic/chatroom." + dto.getChatRoomId(), "read-update");
+    }
+
 }

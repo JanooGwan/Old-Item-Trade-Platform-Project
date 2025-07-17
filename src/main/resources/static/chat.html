@@ -12,7 +12,7 @@
 <div class="top-bar">
   <div>1:1 채팅</div>
   <div>
-    <a href="/mypage/user">마이페이지</a>
+    <a href="/mypage">마이페이지</a>
     <a href="/home">홈</a>
   </div>
 </div>
@@ -38,13 +38,13 @@
   let currentUserId = null;
   let currentChatRoomId = null;
   let currentSubscription = null;
+  let myLastSentReadMessageSentAt = -1;
 
   window.onload = () => {
     fetch("/api/members/me")
             .then(res => res.json())
             .then(data => {
               currentUserId = data.id;
-              localStorage.setItem("memberId", currentUserId);
               connect();
             })
             .catch(() => {
@@ -57,14 +57,13 @@
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, function () {
+    stompClient.connect({}, () => {
       fetchChatRooms();
-      const withNickname = new URLSearchParams(window.location.search).get("with");
-      if (withNickname) {
-        autoEnterOrCreateRoomByNickname(withNickname);
-      }
 
-      document.getElementById("message").addEventListener("keydown", function (e) {
+      const withNickname = new URLSearchParams(window.location.search).get("with");
+      if (withNickname) autoEnterOrCreateRoomByNickname(withNickname);
+
+      document.getElementById("message").addEventListener("keydown", e => {
         if (e.key === "Enter") sendMessage();
       });
     });
@@ -96,44 +95,88 @@
             .then(data => {
               if (data.roomId) enterChatRoom(data.roomId);
               else alert("채팅방 정보를 불러올 수 없습니다.");
-            })
-            .catch(() => alert("채팅방 생성 중 오류가 발생했습니다."));
+            });
   }
 
   function enterChatRoom(roomId) {
     currentChatRoomId = roomId;
     if (currentSubscription) currentSubscription.unsubscribe();
     document.getElementById("message-list").innerHTML = "";
+    loadMessagesAndMarkAsRead(roomId);
 
+    currentSubscription = stompClient.subscribe(`/topic/chatroom.${roomId}`, (messageOutput) => {
+      const body = messageOutput.body;
+
+      try {
+        const data = JSON.parse(body);
+        if (data.readerId) {
+          loadMessagesAndMarkAsRead(currentChatRoomId);
+        } else {
+          loadMessagesAndMarkAsRead(currentChatRoomId);
+        }
+      } catch (e) {
+        loadMessagesAndMarkAsRead(currentChatRoomId);
+      }
+    });
+  }
+
+  function loadMessagesAndMarkAsRead(roomId) {
     fetch(`/api/chatrooms/${roomId}/messages`)
             .then(res => res.json())
             .then(messages => {
+              document.getElementById("message-list").innerHTML = "";
+              updateMyLastSentReadMessageSentAt(messages);
               messages.forEach(displayMessage);
-              markMessagesAsRead(messages); // 읽음 표시 요청
+              appendReadLabel();
+              markMessagesAsRead(messages);
             });
+  }
 
-    currentSubscription = stompClient.subscribe("/topic/chatroom." + roomId, function (messageOutput) {
-      const msg = JSON.parse(messageOutput.body);
-      displayMessage(msg);
-    });
+  function updateMyLastSentReadMessageSentAt(messages) {
+    const readByOtherPartyMessages = messages.filter(
+            m => m.senderId === currentUserId && m.read
+    );
+
+    myLastSentReadMessageSentAt = readByOtherPartyMessages.length > 0
+            ? Math.max(...readByOtherPartyMessages.map(m => m.sentAt))
+            : -1;
   }
 
   function displayMessage(msg) {
     const list = document.getElementById("message-list");
-    const div = document.createElement("div");
-    div.classList.add("message");
-    div.classList.add(msg.senderId === currentUserId ? "my-message" : "other-message");
-    div.innerText = msg.content;
 
-    // 읽음 표시 (내 메시지 중 읽힌 마지막 메시지에만 표시)
-    if (msg.senderId === currentUserId && msg.isRead) {
-      const read = document.createElement("div");
-      read.classList.add("read-label");
-      read.innerText = "읽음";
-      div.appendChild(read);
-    }
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("message");
+    wrapper.classList.add(msg.senderId === currentUserId ? "my-message" : "other-message");
 
-    list.appendChild(div);
+    wrapper.dataset.sentat = msg.sentAt;
+
+    const contentDiv = document.createElement("div");
+    contentDiv.innerText = msg.content;
+    wrapper.appendChild(contentDiv);
+    list.appendChild(wrapper);
+
+    list.scrollTop = list.scrollHeight;
+  }
+
+  function appendReadLabel() {
+    if (myLastSentReadMessageSentAt === -1) return;
+
+    const list = document.getElementById("message-list");
+    const messageElements = Array.from(list.children);
+
+    const lastReadElement = messageElements.find(el =>
+            el.dataset && el.dataset.sentat == myLastSentReadMessageSentAt
+    );
+
+    if (!lastReadElement) return;
+
+    const read = document.createElement("div");
+    read.classList.add("read-label");
+    read.innerText = "읽음";
+
+    lastReadElement.insertAdjacentElement('afterend', read);
+
     list.scrollTop = list.scrollHeight;
   }
 
@@ -144,7 +187,6 @@
     const message = {
       chatRoomId: currentChatRoomId,
       senderId: currentUserId,
-      sentAt: Date.now(),
       content
     };
 
@@ -153,14 +195,16 @@
   }
 
   function markMessagesAsRead(messages) {
-    const lastReceived = messages
-            .filter(m => m.senderId !== currentUserId && !m.isRead)
+    const lastUnreadReceivedMessageSentAt = messages
+            .filter(m => m.senderId !== currentUserId && !m.read)
             .map(m => m.sentAt)
             .pop();
 
-    if (lastReceived !== undefined) {
-      fetch(`/api/chatrooms/${currentChatRoomId}/messages/${lastReceived}/read`, {
+    if (lastUnreadReceivedMessageSentAt !== undefined) {
+      fetch(`/api/chatrooms/${currentChatRoomId}/messages/${lastUnreadReceivedMessageSentAt}/read`, {
         method: "POST"
+      }).then(() => {
+        loadMessagesAndMarkAsRead(currentChatRoomId);
       });
     }
   }

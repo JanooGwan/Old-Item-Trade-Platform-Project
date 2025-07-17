@@ -44,4 +44,9 @@ public class ChatMessage {
 
     @Column(nullable = false)
     boolean isRead;
+
+    public void updateReadStatus() {
+        this.isRead = true;
+    }
+
 }

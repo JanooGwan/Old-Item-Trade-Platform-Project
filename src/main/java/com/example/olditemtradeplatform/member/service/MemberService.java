@@ -1,5 +1,6 @@
 package com.example.olditemtradeplatform.member.service;
 
+import com.example.olditemtradeplatform.like.domain.Like;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.domain.Role;
 import com.example.olditemtradeplatform.member.dto.MemberPageViewResponseDTO;
@@ -7,6 +8,7 @@ import com.example.olditemtradeplatform.member.dto.MemberRegisterRequestDTO;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
 import com.example.olditemtradeplatform.member.dto.MemberUpdateRequestDTO;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
+import com.example.olditemtradeplatform.post.domain.Post;
 import com.example.olditemtradeplatform.post.dto.PostPreviewInMypageResponseDTO;
 import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
 import com.example.olditemtradeplatform.post.repository.PostRepository;
@@ -138,6 +140,17 @@ public class MemberService {
 
     @Transactional
     public void deleteMember(Long id) {
-        memberRepository.deleteById(id);
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        List<Like> likes = likeRepository.findByMember(member);
+
+        for (Like like : likes) {
+            Post post = like.getPost();
+            post.decreaseLikeCount();
+        }
+
+        memberRepository.delete(member);
     }
+
 } 

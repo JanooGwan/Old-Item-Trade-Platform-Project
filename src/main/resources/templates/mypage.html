@@ -15,11 +15,13 @@
     </div>
 
     <p class="text-gray-600 mb-4">안녕하세요, <span id="nickname"></span>님!</p>
+
     <div class="mb-6">
         <a href="/editmemberinfo" class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded">
             내 정보 수정
         </a>
     </div>
+
     <div id="user-section" class="hidden mt-6">
         <h2 class="text-xl font-semibold mb-2">📌 내가 작성한 글</h2>
         <ul id="my-posts" class="mb-6 space-y-2"></ul>
@@ -39,6 +41,12 @@
     <div id="admin-section" class="hidden mt-6">
         <h2 class="text-xl font-semibold mb-2">👥 전체 회원 목록</h2>
         <ul id="member-list" class="space-y-2"></ul>
+    </div>
+
+    <div class="mt-10 text-right">
+        <button onclick="withdrawMember()" class="text-sm text-red-500 hover:underline">
+            회원탈퇴
+        </button>
     </div>
 
 </div>
@@ -137,7 +145,6 @@
             });
     }
 
-
     function unsuspend(memberId, nickname) {
         if (!confirm(`정말 ${nickname} 유저의 정지를 해제하시겠습니까?`)) return;
 
@@ -181,6 +188,23 @@
                     list.appendChild(li);
                 });
             });
+    }
+
+    function withdrawMember() {
+        if (!confirm("정말 탈퇴하시겠습니까?")) return;
+
+        fetch("/api/members/me", {
+            method: "DELETE"
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("회원 탈퇴가 완료되었습니다.");
+                    window.location.href = "/login";
+                } else {
+                    alert("회원 탈퇴에 실패했습니다.");
+                }
+            })
+            .catch(() => alert("요청 중 오류가 발생했습니다."));
     }
 
     document.addEventListener("DOMContentLoaded", () => {
