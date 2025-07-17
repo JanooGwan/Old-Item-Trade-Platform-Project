@@ -1,15 +1,11 @@
-package com.example.olditemtradeplatform.common;
+package com.example.olditemtradeplatform.global;
 
-import com.example.olditemtradeplatform.post.domain.Post;
-import com.example.olditemtradeplatform.postimage.domain.PostImage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Component

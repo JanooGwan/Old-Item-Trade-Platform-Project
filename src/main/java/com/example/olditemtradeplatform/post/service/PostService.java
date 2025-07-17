@@ -1,6 +1,6 @@
 package com.example.olditemtradeplatform.post.service;
 
-import com.example.olditemtradeplatform.common.FileStore;
+import com.example.olditemtradeplatform.global.FileStore;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.post.domain.Post;
 import com.example.olditemtradeplatform.post.dto.PostCreateRequestDTO;

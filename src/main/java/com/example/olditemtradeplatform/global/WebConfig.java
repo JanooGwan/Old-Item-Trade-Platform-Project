@@ -1,4 +1,4 @@
-package com.example.olditemtradeplatform.common;
+package com.example.olditemtradeplatform.global;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
