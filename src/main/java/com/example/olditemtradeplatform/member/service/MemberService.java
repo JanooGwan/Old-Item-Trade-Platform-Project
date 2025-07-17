@@ -1,12 +1,13 @@
-// MemberService.java (확장된 서비스 로직 포함)
 package com.example.olditemtradeplatform.member.service;
 
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.domain.Role;
+import com.example.olditemtradeplatform.member.dto.MemberPageViewResponseDTO;
 import com.example.olditemtradeplatform.member.dto.MemberRegisterRequestDTO;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
 import com.example.olditemtradeplatform.member.dto.MemberUpdateRequestDTO;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
+import com.example.olditemtradeplatform.post.dto.PostPreviewInMypageResponseDTO;
 import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
 import com.example.olditemtradeplatform.post.repository.PostRepository;
 import com.example.olditemtradeplatform.like.repository.LikeRepository;
@@ -31,13 +32,6 @@ public class MemberService {
     private final ReportOfPostRepository reportRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public MemberResponseDTO register(MemberRegisterRequestDTO dto, String encodedPassword) {
-        Member member = dto.toEntity(encodedPassword);
-        memberRepository.save(member);
-        return MemberResponseDTO.from(member);
-    }
-
     @Transactional(readOnly = true)
     public MemberResponseDTO findById(Long id) {
         Member member = memberRepository.findById(id)
@@ -50,23 +44,70 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponseDTO updateMember(Member member, MemberUpdateRequestDTO dto) {
-        String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        member.updateMember(encodedPassword, dto.getEmail(), dto.getNickname());
+    public MemberResponseDTO register(MemberRegisterRequestDTO dto, String encodedPassword) {
+        if (memberRepository.existsByUserId(dto.getUserId())) {
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        }
+
+        if (memberRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        if (memberRepository.existsByNickname(dto.getNickname())) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
+        Member member = dto.toEntity(encodedPassword);
+        memberRepository.save(member);
         return MemberResponseDTO.from(member);
     }
 
     @Transactional
-    public void deleteMember(Long id) {
-        memberRepository.deleteById(id);
+    public MemberResponseDTO updateMember(Member member, MemberUpdateRequestDTO dto) {
+        Member persistentMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), persistentMember.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        if (memberRepository.existsByEmailAndIdNot(dto.getEmail(), member.getId())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        if (memberRepository.existsByNicknameAndIdNot(dto.getNickname(), member.getId())) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
+
+        String encodedPassword = passwordEncoder.encode(dto.getNewPassword());
+        persistentMember.updateMember(encodedPassword, dto.getEmail(), dto.getNickname());
+
+        return MemberResponseDTO.from(persistentMember);
     }
 
     @Transactional(readOnly = true)
-    public List<PostPreviewResponseDTO> getMyPosts(Member member) {
+    public List<PostPreviewInMypageResponseDTO> getMyPosts(Member member) {
         return postRepository.findByWriter(member).stream()
-                .map(PostPreviewResponseDTO::from)
-                .collect(Collectors.toList());
+                .map(PostPreviewInMypageResponseDTO::from)
+                .toList();
     }
+
+    @Transactional(readOnly = true)
+    public MemberPageViewResponseDTO getOtherMemberPage(String nickname) {
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new IllegalArgumentException("해당 닉네임의 회원이 존재하지 않습니다."));
+
+        List<PostPreviewInMypageResponseDTO> posts = postRepository.findByWriter(member).stream()
+                .map(PostPreviewInMypageResponseDTO::from)
+                .toList();
+
+        return MemberPageViewResponseDTO.of(member, posts);
+    }
+
+
 
     @Transactional(readOnly = true)
     public List<PostPreviewResponseDTO> getLikedPosts(Member member) {
@@ -93,5 +134,10 @@ public class MemberService {
         return memberRepository.findAll().stream()
                 .map(MemberResponseDTO::from)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteMember(Long id) {
+        memberRepository.deleteById(id);
     }
 } 

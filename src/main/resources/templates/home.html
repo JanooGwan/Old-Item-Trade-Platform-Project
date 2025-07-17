@@ -73,8 +73,16 @@
     }
 
     function closeImageModal() {
-        const modal = document.getElementById("image-modal");
-        modal.classList.add("hidden");
+        document.getElementById("image-modal").classList.add("hidden");
+    }
+
+    function getDealStatusText(status) {
+        switch (status) {
+            case "WAITING": return "거래 대기";
+            case "IN_PROGRESS": return "예약 중";
+            case "COMPLETED": return "거래 완료";
+            default: return "알 수 없음";
+        }
     }
 
     function timeAgo(dateStr) {
@@ -98,14 +106,19 @@
                 const list = document.getElementById("post-list");
                 if (!Array.isArray(posts)) return;
                 list.innerHTML = posts.map(post => `
-                    <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
-                        <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
-                        <h3 class="text-lg font-bold mb-1">${post.title}</h3>
-                        <p class="text-sm text-gray-400">${timeAgo(post.createdDate)}</p>
-                        <p class="mt-1 text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
-                        <a href="/post/${post.postId}" class="text-orange-500 hover:underline text-sm">자세히 보기</a>
-                    </div>
-                `).join("");
+          <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
+            <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
+            <a href="/post/${post.postId}" class="text-lg font-bold text-blue-600 hover:underline block mb-1">${post.title}</a>
+            <p class="text-sm text-gray-400">
+              ${timeAgo(post.createdDate)} ・
+              <a href="/mypage/${post.writerName}" class="text-blue-500 hover:underline">${post.writerName}</a>님
+            </p>
+            <p class="text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
+            <p class="text-sm text-gray-500 mt-1">
+              거래 상태: <span class="font-semibold text-blue-600">${getDealStatusText(post.dealStatus)}</span>
+            </p>
+          </div>
+        `).join("");
             });
 
         fetch("/api/members/me")
@@ -113,9 +126,9 @@
             .then(data => {
                 if (!data) {
                     document.getElementById("nav-right").innerHTML = `
-                        <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
-                        <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
-                    `;
+            <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
+            <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
+          `;
                     btn.className = "bg-gray-300 text-gray-500 px-4 py-2 rounded font-semibold opacity-50 cursor-not-allowed";
                     btn.disabled = true;
                     btn.onclick = () => location.href = "/login";
@@ -123,10 +136,10 @@
                 }
 
                 document.getElementById("nav-right").innerHTML = `
-                    <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
-                    <button onclick="location.href='/mypage/${data.id}'" class="text-sm text-blue-600 hover:underline">마이페이지</button>
-                    <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
-                `;
+          <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
+          <button onclick="location.href='/mypage'" class="text-sm text-blue-600 hover:underline">마이페이지</button>
+          <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
+        `;
 
                 btn.className = "bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded font-semibold";
                 btn.disabled = false;

@@ -1,9 +1,11 @@
 package com.example.olditemtradeplatform.member.controller;
 
 import com.example.olditemtradeplatform.member.domain.Member;
+import com.example.olditemtradeplatform.member.dto.MemberPageViewResponseDTO;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
 import com.example.olditemtradeplatform.member.dto.MemberUpdateRequestDTO;
 import com.example.olditemtradeplatform.member.service.MemberService;
+import com.example.olditemtradeplatform.post.dto.PostPreviewInMypageResponseDTO;
 import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,7 @@ public class MemberController {
     }
 
     @GetMapping("/me/posts")
-    public ResponseEntity<List<PostPreviewResponseDTO>> getMyPosts(Authentication authentication) {
+    public ResponseEntity<List<PostPreviewInMypageResponseDTO>> getMyPosts(Authentication authentication) {
         Member member = ((CustomUserDetails) authentication.getPrincipal()).getMember();
         return ResponseEntity.ok(memberService.getMyPosts(member));
     }
@@ -42,6 +44,12 @@ public class MemberController {
         Member member = ((CustomUserDetails) authentication.getPrincipal()).getMember();
         return ResponseEntity.ok(memberService.getLikedPosts(member));
     }
+
+    @GetMapping("/mypage/{nickname}")
+    public ResponseEntity<MemberPageViewResponseDTO> getOtherMemberPage(@PathVariable String nickname) {
+        return ResponseEntity.ok(memberService.getOtherMemberPage(nickname));
+    }
+
 
     @PutMapping("/me")
     public ResponseEntity<MemberResponseDTO> updateMyInfo(
@@ -55,6 +63,7 @@ public class MemberController {
 
         return ResponseEntity.ok(updated);
     }
+
 
     @DeleteMapping("/me")
     public ResponseEntity<String> deleteMyAccount(Authentication authentication) {

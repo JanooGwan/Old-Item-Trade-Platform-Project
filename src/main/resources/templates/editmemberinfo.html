@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>내 정보 수정</title>
+    <link href="/css/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<div class="w-full max-w-md bg-white p-6 rounded shadow">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">내 정보 수정</h1>
+        <a href="/mypage" class="text-sm text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700">마이페이지로</a>
+    </div>
+
+    <form id="edit-form" class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">현재 비밀번호 *</label>
+            <input type="password" id="currentPassword" class="w-full mt-1 p-2 border rounded" required>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">새 비밀번호 *</label>
+            <input type="password" id="newPassword" class="w-full mt-1 p-2 border rounded" required>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">새 비밀번호 확인 *</label>
+            <input type="password" id="confirmPassword" class="w-full mt-1 p-2 border rounded" required>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">이메일 *</label>
+            <input type="email" id="email" class="w-full mt-1 p-2 border rounded" required>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700">닉네임 *</label>
+            <input type="text" id="nickname" class="w-full mt-1 p-2 border rounded" required>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">저장</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("/api/members/me")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("email").value = data.email;
+                document.getElementById("nickname").value = data.nickname;
+            });
+    });
+
+    document.getElementById("edit-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const dto = {
+            currentPassword: document.getElementById("currentPassword").value,
+            newPassword: document.getElementById("newPassword").value,
+            confirmPassword: document.getElementById("confirmPassword").value,
+            email: document.getElementById("email").value,
+            nickname: document.getElementById("nickname").value
+        };
+
+        fetch("/api/members/me", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify(dto)
+        })
+            .then(res => {
+                if (!res.ok) return res.text().then(msg => { throw new Error(msg); });
+                return res.json();
+            })
+            .then(() => {
+                alert("회원 정보가 성공적으로 수정되었습니다.");
+                window.location.href = "/mypage";
+            })
+            .catch(err => {
+                alert("수정 실패: " + err.message);
+            });
+    });
+</script>
+</body>
+</html>

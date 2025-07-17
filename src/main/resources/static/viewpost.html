@@ -20,7 +20,11 @@
     </div>
 
     <h1 id="post-title" class="text-2xl font-bold text-orange-500 mb-2">제목</h1>
-    <p id="post-time" class="text-xs text-gray-400 mb-4">작성 시간</p>
+    <p id="post-info" class="text-xs text-gray-400 mb-4">
+        <span id="post-time"></span> ·
+        <a id="writer-nickname" href="#" class="text-blue-600 hover:underline"></a>님 작성
+    </p>
+
     <p id="post-content" class="text-gray-800 mb-4">내용</p>
 
     <div id="image-gallery" class="flex gap-2 mb-4"></div>
@@ -36,55 +40,42 @@
     </div>
 
     <div class="mt-6 flex gap-3">
-        <button id="report-btn" class="bg-red-400 text-white px-4 py-2 rounded">🚨 신고하기</button>
-    </div>
-</div>
-
-<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-    <div class="relative">
-        <img id="modal-image" src="" class="max-w-3xl max-h-[80vh] rounded shadow-lg" />
-        <button onclick="closeModal()" class="absolute top-2 right-2 text-white text-xl">✕</button>
-    </div>
-</div>
-
-<!-- 🚨 신고 모달 -->
-<div id="report-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-    <div class="bg-white p-6 rounded shadow-lg max-w-md w-full relative">
-        <h2 class="text-xl font-bold mb-4">게시글 신고</h2>
-        <textarea id="report-content" rows="4" placeholder="신고 사유를 입력하세요..." class="w-full border rounded p-2 mb-4"></textarea>
-        <div class="flex justify-end gap-2">
-            <button id="cancel-report" class="text-gray-600 px-3 py-1">취소</button>
-            <button id="submit-report" class="bg-red-500 text-white px-3 py-1 rounded">신고 제출</button>
-        </div>
-        <button onclick="closeReportModal()" class="absolute top-2 right-2 text-xl text-gray-600">✕</button>
+        <button id="report-btn" class="bg-red-400 text-white px-4 py-2 rounded hidden">🚨 신고하기</button>
     </div>
 </div>
 
 <script>
     const postId = window.location.pathname.split("/").pop();
 
-    function openModal(imageUrl) {
-        document.getElementById("modal-image").src = imageUrl;
-        document.getElementById("modal").classList.remove("hidden");
-    }
-
-    function closeModal() {
-        document.getElementById("modal").classList.add("hidden");
-    }
-
-    function closeReportModal() {
-        document.getElementById("report-modal").classList.add("hidden");
-        document.getElementById("report-content").value = "";
-    }
-
-    function timeAgo(dateStr) {
+    function formatRelativeTime(createDateStr, modifiedDateStr) {
+        const created = new Date(createDateStr);
+        const modified = new Date(modifiedDateStr);
         const now = new Date();
-        const date = new Date(dateStr);
-        const diff = Math.floor((now - date) / 1000);
-        if (diff < 60) return '방금 전';
-        if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-        return `${Math.floor(diff / 86400)}일 전`;
+        const diffSec = Math.floor((now - created) / 1000);
+
+        let result = "";
+        if (diffSec < 60) result = "방금 전";
+        else if (diffSec < 3600) result = `${Math.floor(diffSec / 60)}분 전`;
+        else if (diffSec < 86400) result = `${Math.floor(diffSec / 3600)}시간 전`;
+        else result = `${Math.floor(diffSec / 86400)}일 전`;
+
+        if (created.toISOString() !== modified.toISOString()) {
+            result += " (수정됨)";
+        }
+
+        return result;
+    }
+
+    function openModal(url) {
+        const modal = document.createElement("div");
+        modal.className = "fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50";
+        modal.innerHTML = `
+      <div class="relative">
+        <img src="${url}" class="max-w-3xl max-h-[80vh] rounded shadow-lg" />
+        <button onclick="this.parentElement.parentElement.remove()" class="absolute top-2 right-2 text-white text-xl">✕</button>
+      </div>
+    `;
+        document.body.appendChild(modal);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -99,7 +90,12 @@
                 document.getElementById("product-price").textContent = data.price ?? "-";
                 document.getElementById("product-count").textContent = data.count ?? "-";
                 document.getElementById("like-count").textContent = data.likeCount ?? 0;
-                document.getElementById("post-time").textContent = timeAgo(data.createDate);
+
+                document.getElementById("post-time").textContent = formatRelativeTime(data.createDate, data.modifiedDate);
+
+                const nicknameLink = document.getElementById("writer-nickname");
+                nicknameLink.textContent = data.writerName;
+                nicknameLink.href = `/mypage/${data.writerName}`;
 
                 const heartIcon = document.getElementById("heart-icon");
                 if (data.liked === true) {
@@ -131,6 +127,10 @@
                 if (data.author === true) {
                     document.getElementById("post-actions").classList.remove("hidden");
 
+                    document.getElementById("edit-btn").addEventListener("click", () => {
+                        location.href = `/editpost/${postId}`;
+                    });
+
                     document.getElementById("delete-btn").addEventListener("click", () => {
                         if (confirm("정말 삭제하시겠습니까?")) {
                             fetch(`/api/posts/${postId}`, { method: "DELETE" })
@@ -142,10 +142,8 @@
                                 .catch(() => alert("삭제 중 오류가 발생했습니다."));
                         }
                     });
-
-                    document.getElementById("edit-btn").addEventListener("click", () => {
-                        location.href = `/editpost/${postId}`;
-                    });
+                } else {
+                    document.getElementById("report-btn").classList.remove("hidden");
                 }
 
                 const likeBtn = document.getElementById("like-btn");
@@ -160,52 +158,37 @@
                         })
                         .catch(() => alert("좋아요 처리 실패"));
                 });
+
+                const reportBtn = document.getElementById("report-btn");
+                reportBtn.addEventListener("click", () => {
+                    const reason = prompt("신고 사유를 입력해주세요:");
+                    if (!reason || reason.trim() === "") {
+                        alert("신고 사유를 입력해야 합니다.");
+                        return;
+                    }
+
+                    fetch("/api/post-reports", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            postId: postId,
+                            content: reason.trim()
+                        })
+                    })
+                        .then(res => {
+                            if (!res.ok) throw new Error();
+                            alert("신고가 접수되었습니다.");
+                        })
+                        .catch(() => {
+                            alert("신고 처리 중 오류가 발생했습니다.");
+                        });
+                });
             })
             .catch(() => {
                 alert("게시글 정보를 불러오는 데 실패했습니다.");
             });
-
-        // 🚨 신고하기 관련 처리
-        const reportBtn = document.getElementById("report-btn");
-        const reportModal = document.getElementById("report-modal");
-        const reportContent = document.getElementById("report-content");
-        const cancelReport = document.getElementById("cancel-report");
-        const submitReport = document.getElementById("submit-report");
-
-        reportBtn.addEventListener("click", () => {
-            reportModal.classList.remove("hidden");
-        });
-
-        cancelReport.addEventListener("click", () => {
-            closeReportModal();
-        });
-
-        submitReport.addEventListener("click", () => {
-            const content = reportContent.value.trim();
-            if (!content) {
-                alert("신고 사유를 입력해주세요.");
-                return;
-            }
-
-            fetch("/api/post-reports", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ postId, content })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("신고 실패");
-                    return res.json();
-                })
-                .then(data => {
-                    alert("신고가 접수되었습니다.");
-                    closeReportModal();
-                })
-                .catch(err => {
-                    alert(err.message || "신고 처리 중 오류가 발생했습니다.");
-                });
-        });
     });
 </script>
 </body>

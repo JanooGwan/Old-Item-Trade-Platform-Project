@@ -57,9 +57,10 @@ public class PostService {
             currentUserId = null;
         }
 
+        postRepository.incrementViewCount(postId);
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-        post.increaseViewCount();
 
         boolean isAuthor = post.getWriter().getId().equals(currentUserId);
 
@@ -67,7 +68,6 @@ public class PostService {
                 .anyMatch(like -> like.getMember().getId().equals(currentUserId));
 
         return PostDetailResponseDTO.from(post, isAuthor, liked);
-
     }
 
     @Transactional(readOnly = true)
@@ -75,23 +75,13 @@ public class PostService {
         return postRepository.findAll().stream()
                 .sorted(Comparator.comparing(Post::getId).reversed())
                 .map(post -> {
-                    long likeCount = post.getLikes().size();
                     String thumbnail = post.getPostImages().stream()
                             .filter(img -> img.getId().getImageAt() == 1)
                             .map(PostImage::getImageUrl)
                             .findFirst()
                             .orElse(null);
 
-                    return PostPreviewResponseDTO.builder()
-                            .postId(post.getId())
-                            .writerName(post.getWriter().getNickname())
-                            .title(post.getTitle())
-                            .createdDate(post.getCreateDate())
-                            .viewCount(post.getViewCount())
-                            .likeCount(likeCount)
-                            .buyOrSale(post.getBuyOrSale().name())
-                            .thumbnailImageUrl(thumbnail)
-                            .build();
+                    return PostPreviewResponseDTO.of(post, thumbnail);
                 })
                 .toList();
     }

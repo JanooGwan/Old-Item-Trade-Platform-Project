@@ -22,6 +22,21 @@ public class PostPreviewResponseDTO {
     private Long likeCount;
     private String buyOrSale;
     private String thumbnailImageUrl;
+    private String dealStatus;
+
+    public static PostPreviewResponseDTO of(Post post, String thumbnailImageUrl) {
+        return PostPreviewResponseDTO.builder()
+                .postId(post.getId())
+                .writerName(post.getWriter().getNickname())
+                .title(post.getTitle())
+                .createdDate(post.getCreateDate())
+                .viewCount(post.getViewCount())
+                .likeCount((long) post.getLikes().size())
+                .buyOrSale(post.getBuyOrSale().name())
+                .thumbnailImageUrl(thumbnailImageUrl)
+                .dealStatus(post.getDealStatus().name())
+                .build();
+    }
 
     public static PostPreviewResponseDTO from(Post post) {
         return PostPreviewResponseDTO.builder()
@@ -33,6 +48,7 @@ public class PostPreviewResponseDTO {
                 .likeCount((long) post.getLikes().size())
                 .buyOrSale(post.getBuyOrSale().name())
                 .thumbnailImageUrl(post.getPostImages().isEmpty() ? null : post.getPostImages().get(0).getImageUrl())
+                .dealStatus(post.getDealStatus().name())
                 .build();
     }
 }

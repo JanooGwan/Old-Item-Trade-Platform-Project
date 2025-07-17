@@ -42,6 +42,16 @@ public class PageController {
         return "forward:/editpost.html";
     }
 
-    @GetMapping("/mypage/{memberId}")
-    public String myPage(@PathVariable Long memberId) { return "mypage"; }
+    @GetMapping("/mypage")
+    public String myPage() { return "mypage"; }
+
+    @GetMapping("/mypage/{nickName}")
+    public String myPage(@PathVariable String nickName) {
+        return "viewmypage";
+    }
+
+    @GetMapping("/editmemberinfo")
+    public String editMember() {
+        return "editmemberinfo";
+    }
 }

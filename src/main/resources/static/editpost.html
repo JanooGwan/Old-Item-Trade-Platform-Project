@@ -9,7 +9,6 @@
 
 <div class="bg-white p-8 rounded shadow-md w-full max-w-xl relative">
 
-    <!-- ✅ 홈 / 뒤로가기 버튼 -->
     <div class="absolute top-4 right-4 flex gap-4">
         <button onclick="location.href='/home'" class="text-sm text-blue-600 hover:underline">🏠 홈</button>
         <button id="back-btn" class="text-sm text-blue-600 hover:underline">🔙 뒤로가기</button>
@@ -34,8 +33,8 @@
         <div>
             <label class="block text-sm font-medium text-gray-700">거래 상태</label>
             <select id="deal-status" class="mt-1 w-full border rounded px-3 py-2">
-                <option value="AVAILABLE">거래 가능</option>
-                <option value="RESERVED">예약 중</option>
+                <option value="WAITING">거래 대기</option>
+                <option value="IN_PROGRESS">예약 중</option>
                 <option value="COMPLETED">거래 완료</option>
             </select>
         </div>
@@ -61,7 +60,6 @@
             .catch(() => alert("게시글 정보를 불러오는 데 실패했습니다."));
     });
 
-    // ✅ 뒤로가기 버튼 → 게시글 상세로 이동
     document.getElementById("back-btn").addEventListener("click", () => {
         location.href = `/post/${postId}`;
     });
@@ -80,6 +78,7 @@
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include",
             body: JSON.stringify(dto)
         })
             .then(res => {
