@@ -39,6 +39,12 @@ public class ChatRoom {
     }
 
     public boolean hasParticipant(Member member) {
-        return member1.equals(member) || member2.equals(member);
+        return member1.getId().equals(member.getId()) || member2.getId().equals(member.getId());
     }
+
+    public boolean isSameRoom(Member m1, Member m2) {
+        return (member1.getId().equals(m1.getId()) && member2.getId().equals(m2.getId()))
+                || (member1.getId().equals(m2.getId()) && member2.getId().equals(m1.getId()));
+    }
+
 }

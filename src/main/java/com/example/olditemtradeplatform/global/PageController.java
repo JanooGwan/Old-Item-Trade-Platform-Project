@@ -53,4 +53,9 @@ public class PageController {
     public String editMember() {
         return "editmemberinfo";
     }
+
+    @GetMapping("/chat")
+    public String chatPage() {
+        return "forward:/chat.html";
+    }
 }

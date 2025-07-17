@@ -1,0 +1,129 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #fafafa;
+}
+
+.top-bar {
+    background-color: #dd7733;
+    color: white;
+    padding: 1rem 2rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-bar a {
+    color: white;
+    margin-left: 1rem;
+    text-decoration: none;
+}
+
+.chat-container {
+    display: flex;
+    height: calc(100vh - 64px);
+}
+
+.chat-list {
+    width: 200px;
+    background-color: #fff;
+    padding: 1rem;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.chat-divider {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    margin: 1rem 0;
+}
+
+.chatroom-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chatroom-button {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f7f7f7;
+    cursor: pointer;
+    text-align: center;
+}
+
+.chatroom-button:hover {
+    background-color: #eee;
+}
+
+.chat-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f8f8;
+}
+
+.message-list {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message {
+    max-width: 60%;
+    padding: 0.7rem 1rem;
+    border-radius: 20px;
+    word-break: break-word;
+    position: relative;
+    font-size: 15px;
+}
+
+.my-message {
+    background-color: #9bbcf5;
+    align-self: flex-end;
+    color: white;
+    border-bottom-right-radius: 0;
+}
+
+.other-message {
+    background-color: #e0e0e0;
+    align-self: flex-start;
+    border-bottom-left-radius: 0;
+}
+
+.read-label {
+    font-size: 12px;
+    color: #999;
+    margin-top: 3px;
+    text-align: right;
+}
+
+.message-input {
+    display: flex;
+    border-top: 1px solid #ccc;
+    padding: 0.7rem;
+    background: #fff;
+}
+
+.message-input input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.message-input button {
+    padding: 0.5rem 1.2rem;
+    background-color: #6a9ee6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}

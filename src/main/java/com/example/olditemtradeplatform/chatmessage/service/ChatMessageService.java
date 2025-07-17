@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ChatMessageService {
@@ -22,17 +24,44 @@ public class ChatMessageService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ChatMessageResponseDTO createMessage(Long chatRoomId, Long senderId, ChatMessageRequestDTO dto, Long sentAt) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+    public ChatMessage saveChatMessage(ChatMessageRequestDTO dto) {
+        ChatRoom chatRoom = chatRoomRepository.findById(dto.getChatRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("ChatRoom not found"));
-        Member sender = memberRepository.findById(senderId)
+        Member sender = memberRepository.findById(dto.getSenderId())
                 .orElseThrow(() -> new IllegalArgumentException("Sender not found"));
 
-        ChatMessage message = dto.toEntity(sender, chatRoom, sentAt);
-        chatMessageRepository.save(message);
+        Long nextSentAt = chatMessageRepository.countByChatroom(chatRoom) + 1;
 
-        return ChatMessageResponseDTO.from(message);
+        ChatMessage message = ChatMessage.builder()
+                .id(new ChatMessageId(chatRoom.getId(), nextSentAt))
+                .sender(sender)
+                .chatroom(chatRoom)
+                .content(dto.getContent())
+                .isRead(false)
+                .sentAt(nextSentAt)
+                .build();
+
+        return chatMessageRepository.save(message);
     }
+
+
+    @Transactional(readOnly = true)
+    public List<ChatMessageResponseDTO> getMessagesByRoomId(Long chatRoomId, Long memberId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        if (!chatRoom.hasParticipant(member)) {
+            throw new IllegalArgumentException("해당 채팅방에 접근할 수 없습니다.");
+        }
+
+        return chatMessageRepository.findByChatroomOrderBySentAtAsc(chatRoom).stream()
+                .map(ChatMessageResponseDTO::from)
+                .toList();
+    }
+
 
     @Transactional(readOnly = true)
     public ChatMessageResponseDTO findMessage(ChatMessageId id) {

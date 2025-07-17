@@ -9,9 +9,12 @@
 <body class="bg-gray-100 min-h-screen">
 <div class="max-w-4xl mx-auto py-10 px-6 bg-white shadow rounded relative">
 
+    <!-- 🔼 상단 우측 버튼들 -->
     <div class="absolute top-4 right-6 flex gap-4">
         <button onclick="location.href='/home'" class="text-sm text-blue-600 hover:underline">🏠 홈</button>
         <button onclick="history.back()" class="text-sm text-gray-600 hover:underline">🔙 뒤로가기</button>
+        <!-- ✅ 채팅하기 버튼 추가 -->
+        <button id="chat-btn" class="text-sm text-orange-600 hover:underline">💬 채팅하기</button>
     </div>
 
     <h1 id="nickname-title" class="text-2xl font-bold text-center text-orange-600 mb-6">작성자 마이페이지</h1>
@@ -55,8 +58,15 @@
                 document.getElementById("user-id").textContent = data.userId;
                 document.getElementById("email").textContent = data.email;
 
-                const postList = document.getElementById("post-list");
+                const targetMemberNickname = data.memberId;
+                document.getElementById("chat-btn").onclick = () => {
+                    if (nickname) {
+                        window.location.href = `/chat?with=${encodeURIComponent(nickname)}`;
+                    }
+                };
 
+
+                const postList = document.getElementById("post-list");
                 if (data.posts.length === 0) {
                     postList.innerHTML = '<li class="text-gray-500">작성한 게시글이 없습니다.</li>';
                 } else {
