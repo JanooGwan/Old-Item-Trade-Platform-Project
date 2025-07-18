@@ -1,4 +1,4 @@
-package com.example.olditemtradeplatform.chat.controller;
+package com.example.olditemtradeplatform.chatroom.controller;
 
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageRequestDTO;
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageResponseDTO;
