@@ -1,12 +1,11 @@
 package com.example.olditemtradeplatform.post.service;
 
+import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.global.filesystem.FileStore;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.post.domain.Post;
-import com.example.olditemtradeplatform.post.dto.PostCreateRequestDTO;
-import com.example.olditemtradeplatform.post.dto.PostDetailResponseDTO;
-import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
-import com.example.olditemtradeplatform.post.dto.PostUpdateRequestDTO;
+import com.example.olditemtradeplatform.post.dto.*;
+import com.example.olditemtradeplatform.post.exception.PostErrorCode;
 import com.example.olditemtradeplatform.post.repository.PostRepository;
 import com.example.olditemtradeplatform.postimage.domain.PostImage;
 import com.example.olditemtradeplatform.postimage.repository.PostImageRepository;
@@ -15,7 +14,6 @@ import com.example.olditemtradeplatform.product.dto.ProductRequestDTO;
 import com.example.olditemtradeplatform.product.repository.ProductRepository;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +35,7 @@ public class PostService {
     @Transactional
     public PostDetailResponseDTO getPost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
         post.increaseViewCount();
         return PostDetailResponseDTO.from(post);
     }
@@ -60,10 +58,9 @@ public class PostService {
         postRepository.incrementViewCount(postId);
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
 
         boolean isAuthor = post.getWriter().getId().equals(currentUserId);
-
         boolean liked = post.getLikes().stream()
                 .anyMatch(like -> like.getMember().getId().equals(currentUserId));
 
@@ -88,7 +85,6 @@ public class PostService {
 
     @Transactional
     public PostDetailResponseDTO createPost(Member writer, PostCreateRequestDTO postDto, ProductRequestDTO productDto, List<MultipartFile> images) {
-
         Post post = postDto.toEntity(writer);
         Post savedPost = postRepository.save(post);
 
@@ -102,15 +98,12 @@ public class PostService {
             for (MultipartFile image : images) {
                 try {
                     String imageUrl = fileStore.saveFile(image);
-
                     PostImage postImage = new PostImage(savedPost, (long) imageIndex++, imageUrl);
                     postImageRepository.save(postImage);
-
                 } catch (IOException e) {
-                    throw new RuntimeException("이미지 저장 중 오류 발생", e);
+                    throw new CustomException(PostErrorCode.FILE_SAVE_FAILED);
                 }
             }
-
         }
 
         return PostDetailResponseDTO.from(savedPost);
@@ -119,17 +112,17 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostDetailResponseDTO findPost(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
         return PostDetailResponseDTO.from(post);
     }
 
     @Transactional
     public void updatePost(Long postId, PostUpdateRequestDTO dto, Long requesterId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
 
         if (!post.getWriter().getId().equals(requesterId)) {
-            throw new AccessDeniedException("작성자만 수정할 수 있습니다.");
+            throw new CustomException(PostErrorCode.NOT_AUTHOR);
         }
 
         post.updatePost(dto.getContent(), dto.getDealWay(), dto.getDealStatus());
@@ -138,13 +131,12 @@ public class PostService {
     @Transactional
     public void deletePost(Long postId, Long requesterId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
 
         if (!post.getWriter().getId().equals(requesterId)) {
-            throw new AccessDeniedException("작성자만 삭제할 수 있습니다.");
+            throw new CustomException(PostErrorCode.NOT_AUTHOR);
         }
 
         postRepository.delete(post);
     }
-
 }
