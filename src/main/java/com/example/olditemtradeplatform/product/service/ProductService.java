@@ -1,10 +1,12 @@
 package com.example.olditemtradeplatform.product.service;
 
+import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.post.domain.Post;
 import com.example.olditemtradeplatform.post.repository.PostRepository;
 import com.example.olditemtradeplatform.product.domain.Product;
 import com.example.olditemtradeplatform.product.dto.ProductRequestDTO;
 import com.example.olditemtradeplatform.product.dto.ProductResponseDTO;
+import com.example.olditemtradeplatform.product.exception.ProductErrorCode;
 import com.example.olditemtradeplatform.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class ProductService {
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO dto) {
         Post post = postRepository.findById(dto.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.POST_NOT_FOUND));
 
         Product product = dto.toEntity(post);
         productRepository.save(product);
@@ -28,11 +30,10 @@ public class ProductService {
         return ProductResponseDTO.from(product);
     }
 
-
     @Transactional(readOnly = true)
     public ProductResponseDTO findProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
         return ProductResponseDTO.from(product);
     }
 
