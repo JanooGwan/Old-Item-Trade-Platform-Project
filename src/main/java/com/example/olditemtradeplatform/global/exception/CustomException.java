@@ -1,6 +1,7 @@
 package com.example.olditemtradeplatform.global.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public class CustomException extends RuntimeException {
@@ -20,7 +21,7 @@ public class CustomException extends RuntimeException {
         return errorCode.getStatus().value();
     }
 
-    public org.springframework.http.HttpStatus getStatus() {
+    public HttpStatus getStatus() {
         return errorCode.getStatus();
     }
 }

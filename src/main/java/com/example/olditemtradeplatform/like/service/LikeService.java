@@ -64,8 +64,6 @@ public class LikeService {
         }
     }
 
-
-
     @Transactional(readOnly = true)
     public int countLikes(Long postId) {
         return likeRepository.countByPostId(postId);
