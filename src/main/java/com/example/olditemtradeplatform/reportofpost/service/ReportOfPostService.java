@@ -1,15 +1,15 @@
 package com.example.olditemtradeplatform.reportofpost.service;
 
+import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.member.domain.Member;
-import com.example.olditemtradeplatform.member.repository.MemberRepository;
 import com.example.olditemtradeplatform.post.domain.Post;
 import com.example.olditemtradeplatform.post.repository.PostRepository;
 import com.example.olditemtradeplatform.reportofpost.domain.ReportOfPost;
 import com.example.olditemtradeplatform.reportofpost.domain.ReportOfPostId;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostRequestDTO;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostResponseDTO;
+import com.example.olditemtradeplatform.reportofpost.exception.ReportOfPostErrorCode;
 import com.example.olditemtradeplatform.reportofpost.repository.ReportOfPostRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +26,12 @@ public class ReportOfPostService {
     @Transactional
     public ReportOfPostResponseDTO reportPost(ReportOfPostRequestDTO dto, Member reporter) {
         Post post = postRepository.findById(dto.getPostId())
-                .orElseThrow(() -> new EntityNotFoundException("해당 게시글이 없습니다."));
+                .orElseThrow(() -> new CustomException(ReportOfPostErrorCode.POST_NOT_FOUND));
 
         ReportOfPostId id = new ReportOfPostId(post.getId(), reporter.getId());
 
         if (reportOfPostRepository.existsById(id)) {
-            throw new IllegalStateException("이미 이 게시글을 신고했습니다.");
+            throw new CustomException(ReportOfPostErrorCode.DUPLICATE_REPORT);
         }
 
         ReportOfPost report = new ReportOfPost(post, reporter, dto.getContent());
@@ -50,7 +50,7 @@ public class ReportOfPostService {
     @Transactional(readOnly = true)
     public ReportOfPostResponseDTO findReport(Long postId, Long reporterId) {
         ReportOfPost report = reportOfPostRepository.findById(new ReportOfPostId(postId, reporterId))
-                .orElseThrow(() -> new IllegalArgumentException("Report not found"));
+                .orElseThrow(() -> new CustomException(ReportOfPostErrorCode.REPORT_NOT_FOUND));
         return ReportOfPostResponseDTO.from(report);
     }
 
