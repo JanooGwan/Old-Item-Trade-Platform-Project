@@ -45,7 +45,15 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         fetch("/api/members/me")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => {
+                        alert(err.message || "회원 정보를 불러올 수 없습니다.");
+                        throw new Error(err.message);
+                    });
+                }
+                return res.json();
+            })
             .then(data => {
                 document.getElementById("email").value = data.email;
                 document.getElementById("nickname").value = data.nickname;
@@ -72,7 +80,12 @@
             body: JSON.stringify(dto)
         })
             .then(res => {
-                if (!res.ok) return res.text().then(msg => { throw new Error(msg); });
+                if (!res.ok) {
+                    return res.json().then(err => {
+                        alert(err.message || "수정 중 오류가 발생했습니다.");
+                        throw new Error(err.message);
+                    });
+                }
                 return res.json();
             })
             .then(() => {
@@ -80,6 +93,7 @@
                 window.location.href = "/mypage";
             })
             .catch(err => {
+                console.error(err);
                 alert("수정 실패: " + err.message);
             });
     });

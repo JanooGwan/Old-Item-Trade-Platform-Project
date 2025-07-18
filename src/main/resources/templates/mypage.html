@@ -59,50 +59,59 @@
         return li;
     }
 
-    function loadMyPosts() {
-        fetch("/api/members/me/posts")
-            .then(res => res.json())
-            .then(posts => {
-                const list = document.getElementById("my-posts");
-                if (!Array.isArray(posts)) return;
-                posts.forEach(post => {
-                    const html = `📄 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a> (${post.viewCount} 조회, ${post.likeCount} 좋아요)`;
-                    list.appendChild(createListItem(html));
-                });
-            });
+    async function fetchWithErrorHandling(url, options = {}) {
+        const res = await fetch(url, options);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ message: "알 수 없는 오류가 발생했습니다." }));
+            throw new Error(err.message || "요청 실패");
+        }
+        return res.json();
     }
 
-    function loadMyLikes() {
-        fetch("/api/members/me/likes")
-            .then(res => res.json())
-            .then(posts => {
-                const list = document.getElementById("my-likes");
-                if (!Array.isArray(posts)) return;
-                posts.forEach(post => {
-                    const html = `💖 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a>`;
-                    list.appendChild(createListItem(html));
-                });
+    async function loadMyPosts() {
+        try {
+            const posts = await fetchWithErrorHandling("/api/members/me/posts");
+            const list = document.getElementById("my-posts");
+            posts.forEach(post => {
+                const html = `📄 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a> (${post.viewCount} 조회, ${post.likeCount} 좋아요)`;
+                list.appendChild(createListItem(html));
             });
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    function loadReports() {
-        fetch("/api/manager/post-reports")
-            .then(res => res.json())
-            .then(reports => {
-                const list = document.getElementById("report-list");
-                if (!Array.isArray(reports)) return;
-                reports.forEach(report => {
-                    const html = `🚨 <a href="/post/${report.postId}" class="text-blue-600 hover:underline font-bold">${report.title}</a><br>
+    async function loadMyLikes() {
+        try {
+            const posts = await fetchWithErrorHandling("/api/members/me/likes");
+            const list = document.getElementById("my-likes");
+            posts.forEach(post => {
+                const html = `💖 <a href="/post/${post.postId}" class="text-blue-600 hover:underline">${post.title}</a>`;
+                list.appendChild(createListItem(html));
+            });
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+
+    async function loadReports() {
+        try {
+            const reports = await fetchWithErrorHandling("/api/manager/post-reports");
+            const list = document.getElementById("report-list");
+            reports.forEach(report => {
+                const html = `🚨 <a href="/post/${report.postId}" class="text-blue-600 hover:underline font-bold">${report.title}</a><br>
                         신고자: ${report.reporterNickname}<br>
                         사유: ${report.content}<br>
                         <button onclick="suspendUser(${report.postId}, ${report.reporterId})" class="bg-red-500 text-white px-2 py-1 rounded mr-2">정지</button>
                         <button onclick="dismissReport(${report.postId}, ${report.reporterId})" class="bg-gray-400 text-white px-2 py-1 rounded">기각</button>`;
-                    list.appendChild(createListItem(html));
-                });
+                list.appendChild(createListItem(html));
             });
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    function suspendUser(postId, reporterId) {
+    async function suspendUser(postId, reporterId) {
         const days = prompt("정지 기간을 입력하세요 (예: 1, 3, 7, 30, 9999[영구정지])");
         if (!days) return;
         const reason = prompt("정지 사유를 입력하세요");
@@ -111,124 +120,137 @@
         const until = new Date();
         until.setDate(until.getDate() + parseInt(days));
 
-        fetch("/api/manager/suspend", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                postId, reporterId,
-                suspendUntil: until.toISOString().split("T")[0],
-                suspendReason: reason
-            })
-        }).then(() => window.location.reload());
+        try {
+            await fetchWithErrorHandling("/api/manager/suspend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    postId, reporterId,
+                    suspendUntil: until.toISOString().split("T")[0],
+                    suspendReason: reason
+                })
+            });
+            window.location.reload();
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    function dismissReport(postId, reporterId) {
+    async function dismissReport(postId, reporterId) {
         if (!confirm("정말 해당 신고를 기각하시겠습니까?")) return;
 
-        fetch(`/api/manager/post-reports/${postId}/${reporterId}`, {
-            method: "DELETE"
-        }).then(() => window.location.reload());
+        try {
+            await fetchWithErrorHandling(`/api/manager/post-reports/${postId}/${reporterId}`, { method: "DELETE" });
+            window.location.reload();
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    function loadSuspendedMembers() {
-        fetch("/api/manager/suspended-members")
-            .then(res => res.json())
-            .then(members => {
-                const list = document.getElementById("suspended-members");
-                if (!Array.isArray(members)) return;
-                members.forEach(member => {
-                    const html = `👤 ${member.nickName} / 아이디 : ${member.userId} / 정지기한: ${member.suspendUntil || '없음'}<br>
+    async function loadSuspendedMembers() {
+        try {
+            const members = await fetchWithErrorHandling("/api/manager/suspended-members");
+            const list = document.getElementById("suspended-members");
+            members.forEach(member => {
+                const html = `👤 ${member.nickName} / 아이디 : ${member.userId} / 정지기한: ${member.suspendUntil || '없음'}<br>
                     사유: ${member.suspendReason || '없음'}<br>
                     <button onclick="unsuspend(${member.userId}, '${member.nickName}')" class="bg-blue-500 text-white px-2 py-1 rounded">정지 해제</button>`;
-                    list.appendChild(createListItem(html));
-                });
+                list.appendChild(createListItem(html));
             });
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    function unsuspend(memberId, nickname) {
+    async function unsuspend(memberId, nickname) {
         if (!confirm(`정말 ${nickname} 유저의 정지를 해제하시겠습니까?`)) return;
 
-        fetch(`/api/manager/unsuspend/${memberId}`, { method: "POST" })
-            .then(() => window.location.reload());
+        try {
+            await fetchWithErrorHandling(`/api/manager/unsuspend/${memberId}`, { method: "POST" });
+            window.location.reload();
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    function loadMemberList() {
-        fetch("/api/admin/members")
-            .then(res => res.json())
-            .then(members => {
-                const list = document.getElementById("member-list");
-                if (!Array.isArray(members)) return;
-                members.forEach(member => {
-                    const li = document.createElement("li");
-                    li.className = "px-4 py-2 bg-gray-100 rounded shadow-sm flex justify-between items-center";
+    async function loadMemberList() {
+        try {
+            const members = await fetchWithErrorHandling("/api/admin/members");
+            const list = document.getElementById("member-list");
 
-                    const label = document.createElement("span");
-                    label.innerText = `👤 ${member.nickname}`;
+            members.forEach(member => {
+                const li = document.createElement("li");
+                li.className = "px-4 py-2 bg-gray-100 rounded shadow-sm flex justify-between items-center";
 
-                    const select = document.createElement("select");
-                    ["NORMAL", "MANAGER", "ADMIN"].forEach(role => {
-                        const option = document.createElement("option");
-                        option.value = role;
-                        option.text = role;
-                        if (member.role === role) option.selected = true;
-                        select.appendChild(option);
-                    });
+                const label = document.createElement("span");
+                label.innerText = `👤 ${member.nickname}`;
 
-                    select.className = "ml-4 px-2 py-1 border rounded";
-                    select.onchange = () => {
-                        fetch(`/api/admin/change-role/${member.id}`, {
+                const select = document.createElement("select");
+                ["NORMAL", "MANAGER", "ADMIN"].forEach(role => {
+                    const option = document.createElement("option");
+                    option.value = role;
+                    option.text = role;
+                    if (member.role === role) option.selected = true;
+                    select.appendChild(option);
+                });
+
+                select.className = "ml-4 px-2 py-1 border rounded";
+                select.onchange = async () => {
+                    try {
+                        await fetchWithErrorHandling(`/api/admin/change-role/${member.id}`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ role: select.value })
-                        }).then(() => alert("권한이 변경되었습니다."));
-                    };
+                        });
+                        alert("권한이 변경되었습니다.");
+                    } catch (err) {
+                        alert(err.message);
+                    }
+                };
 
-                    li.appendChild(label);
-                    li.appendChild(select);
-                    list.appendChild(li);
-                });
+                li.appendChild(label);
+                li.appendChild(select);
+                list.appendChild(li);
             });
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    function withdrawMember() {
+    async function withdrawMember() {
         if (!confirm("정말 탈퇴하시겠습니까?")) return;
 
-        fetch("/api/members/me", {
-            method: "DELETE"
-        })
-            .then(res => {
-                if (res.ok) {
-                    alert("회원 탈퇴가 완료되었습니다.");
-                    window.location.href = "/login";
-                } else {
-                    alert("회원 탈퇴에 실패했습니다.");
-                }
-            })
-            .catch(() => alert("요청 중 오류가 발생했습니다."));
+        try {
+            await fetchWithErrorHandling("/api/members/me", { method: "DELETE" });
+            alert("회원 탈퇴가 완료되었습니다.");
+            window.location.href = "/login";
+        } catch (err) {
+            alert(err.message);
+        }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        fetch("/api/members/me")
-            .then(res => res.json())
-            .then(member => {
-                document.getElementById("nickname").textContent = member.nickname;
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const member = await fetchWithErrorHandling("/api/members/me");
+            document.getElementById("nickname").textContent = member.nickname;
 
-                if (member.role === "NORMAL") {
-                    document.getElementById("user-section").classList.remove("hidden");
-                    loadMyPosts();
-                    loadMyLikes();
-                } else {
-                    document.getElementById("manager-section").classList.remove("hidden");
-                    loadReports();
-                    loadSuspendedMembers();
+            if (member.role === "NORMAL") {
+                document.getElementById("user-section").classList.remove("hidden");
+                loadMyPosts();
+                loadMyLikes();
+            } else {
+                document.getElementById("manager-section").classList.remove("hidden");
+                loadReports();
+                loadSuspendedMembers();
 
-                    if (member.role === "ADMIN") {
-                        document.getElementById("admin-section").classList.remove("hidden");
-                        loadMemberList();
-                    }
+                if (member.role === "ADMIN") {
+                    document.getElementById("admin-section").classList.remove("hidden");
+                    loadMemberList();
                 }
-            })
-            .catch(() => alert("로그인 정보를 불러오지 못했습니다."));
+            }
+        } catch (err) {
+            alert(err.message);
+        }
     });
 </script>
 </body>

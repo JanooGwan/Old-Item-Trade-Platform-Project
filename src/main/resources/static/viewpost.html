@@ -80,7 +80,15 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         fetch(`/api/posts/${postId}`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => {
+                        alert(err.message || "게시글 정보를 불러오는 데 실패했습니다.");
+                        throw new Error(err.message);
+                    });
+                }
+                return res.json();
+            })
             .then(data => {
                 document.getElementById("post-title").textContent = data.title;
                 document.getElementById("post-content").textContent = data.content;
@@ -135,11 +143,15 @@
                         if (confirm("정말 삭제하시겠습니까?")) {
                             fetch(`/api/posts/${postId}`, { method: "DELETE" })
                                 .then(res => {
-                                    if (!res.ok) throw new Error();
+                                    if (!res.ok) {
+                                        return res.json().then(err => {
+                                            alert(err.message || "삭제 중 오류가 발생했습니다.");
+                                            throw new Error(err.message);
+                                        });
+                                    }
                                     alert("삭제 완료되었습니다.");
                                     location.href = "/home";
-                                })
-                                .catch(() => alert("삭제 중 오류가 발생했습니다."));
+                                });
                         }
                     });
                 } else {
@@ -151,12 +163,19 @@
 
                 likeBtn.addEventListener("click", () => {
                     fetch(`/likes/${postId}`, { method: 'POST' })
-                        .then(res => res.json())
+                        .then(res => {
+                            if (!res.ok) {
+                                return res.json().then(err => {
+                                    alert(err.message || "좋아요 처리 실패");
+                                    throw new Error(err.message);
+                                });
+                            }
+                            return res.json();
+                        })
                         .then(data => {
                             heartIcon.textContent = data.liked ? "❤️" : "♡";
                             likeCountSpan.textContent = data.likeCount;
-                        })
-                        .catch(() => alert("좋아요 처리 실패"));
+                        });
                 });
 
                 const reportBtn = document.getElementById("report-btn");
@@ -178,15 +197,18 @@
                         })
                     })
                         .then(res => {
-                            if (!res.ok) throw new Error();
+                            if (!res.ok) {
+                                return res.json().then(err => {
+                                    alert(err.message || "신고 처리 중 오류가 발생했습니다.");
+                                    throw new Error(err.message);
+                                });
+                            }
                             alert("신고가 접수되었습니다.");
-                        })
-                        .catch(() => {
-                            alert("신고 처리 중 오류가 발생했습니다.");
                         });
                 });
             })
-            .catch(() => {
+            .catch(err => {
+                console.error(err);
                 alert("게시글 정보를 불러오는 데 실패했습니다.");
             });
     });

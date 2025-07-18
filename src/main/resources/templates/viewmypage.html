@@ -9,11 +9,9 @@
 <body class="bg-gray-100 min-h-screen">
 <div class="max-w-4xl mx-auto py-10 px-6 bg-white shadow rounded relative">
 
-    <!-- 🔼 상단 우측 버튼들 -->
     <div class="absolute top-4 right-6 flex gap-4">
         <button onclick="location.href='/home'" class="text-sm text-blue-600 hover:underline">🏠 홈</button>
         <button onclick="history.back()" class="text-sm text-gray-600 hover:underline">🔙 뒤로가기</button>
-        <!-- ✅ 채팅하기 버튼 추가 -->
         <button id="chat-btn" class="text-sm text-orange-600 hover:underline">💬 채팅하기</button>
     </div>
 
@@ -50,21 +48,20 @@
         document.getElementById("nickname-title").textContent = `${nickname}님의 마이페이지`;
 
         fetch(`/api/members/mypage/${nickname}`)
-            .then(res => {
-                if (!res.ok) throw new Error();
+            .then(async res => {
+                if (!res.ok) {
+                    const error = await res.json().catch(() => ({ message: "알 수 없는 오류가 발생했습니다." }));
+                    throw new Error(error.message);
+                }
                 return res.json();
             })
             .then(data => {
                 document.getElementById("user-id").textContent = data.userId;
                 document.getElementById("email").textContent = data.email;
 
-                const targetMemberNickname = data.memberId;
                 document.getElementById("chat-btn").onclick = () => {
-                    if (nickname) {
-                        window.location.href = `/chat?with=${encodeURIComponent(nickname)}`;
-                    }
+                    window.location.href = `/chat?with=${encodeURIComponent(nickname)}`;
                 };
-
 
                 const postList = document.getElementById("post-list");
                 if (data.posts.length === 0) {
@@ -74,19 +71,19 @@
                         const li = document.createElement("li");
                         li.className = "p-4 bg-gray-50 rounded shadow-sm hover:bg-gray-100";
                         li.innerHTML = `
-              <a href="/post/${post.postId}" class="text-blue-600 font-semibold hover:underline">
-                ${post.title}
-              </a>
-              <p class="text-sm text-gray-500 mt-1">
-                좋아요: ${post.likeCount} · 조회수: ${post.viewCount}
-              </p>
-            `;
+                            <a href="/post/${post.postId}" class="text-blue-600 font-semibold hover:underline">
+                                ${post.title}
+                            </a>
+                            <p class="text-sm text-gray-500 mt-1">
+                                좋아요: ${post.likeCount} · 조회수: ${post.viewCount}
+                            </p>
+                        `;
                         postList.appendChild(li);
                     });
                 }
             })
-            .catch(() => {
-                alert("마이페이지 정보를 불러오는 데 실패했습니다.");
+            .catch(err => {
+                alert(err.message || "마이페이지 정보를 불러오는 데 실패했습니다.");
                 window.location.href = "/home";
             });
     }

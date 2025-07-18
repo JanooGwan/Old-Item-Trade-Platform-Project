@@ -34,7 +34,7 @@
 </div>
 
 <script>
-    document.getElementById("signup-form").addEventListener("submit", function (e) {
+    document.getElementById("signup-form").addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const userId = document.getElementById("userId").value;
@@ -42,25 +42,28 @@
         const nickname = document.getElementById("nickname").value;
         const email = document.getElementById("email").value;
 
-        fetch("/auths/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userId, password, nickname, email }),
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error("회원가입 실패");
-                return res.text();
-            })
-            .then(() => {
-                alert("회원가입이 완료되었습니다! 로그인 해주세요.");
-                window.location.href = "/login";
-            })
-            .catch((err) => {
-                alert("회원가입에 실패했습니다. 입력값을 확인해주세요.");
-                console.error(err);
+        try {
+            const res = await fetch("/auths/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userId, password, nickname, email }),
             });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => null);
+                const message = errorData?.message || "회원가입에 실패했습니다.";
+                alert(message);
+                return;
+            }
+
+            alert("회원가입이 완료되었습니다! 로그인 해주세요.");
+            window.location.href = "/login";
+        } catch (err) {
+            alert("예상치 못한 오류가 발생했습니다.");
+            console.error(err);
+        }
     });
 </script>
 </body>

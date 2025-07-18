@@ -101,51 +101,70 @@
         const btn = document.getElementById("write-btn");
 
         fetch("/api/posts")
-            .then(res => res.ok ? res.json() : [])
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => {
+                        alert(err.message || "게시글 목록을 불러오는 데 실패했습니다.");
+                        throw new Error(err.message);
+                    });
+                }
+                return res.json();
+            })
             .then(posts => {
                 const list = document.getElementById("post-list");
                 if (!Array.isArray(posts)) return;
                 list.innerHTML = posts.map(post => `
-          <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
-            <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
-            <a href="/post/${post.postId}" class="text-lg font-bold text-blue-600 hover:underline block mb-1">${post.title}</a>
-            <p class="text-sm text-gray-400">
-              ${timeAgo(post.createdDate)} ・
-              <a href="/mypage/${post.writerName}" class="text-blue-500 hover:underline">${post.writerName}</a>님
-            </p>
-            <p class="text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
-            <p class="text-sm text-gray-400">구매/판매: <span class="font-semibold">${post.buyOrSale === 'BUY' ? '구매' : '판매'}</span></p>
-            <p class="text-sm text-gray-500 mt-1">
-              거래 상태: <span class="font-semibold text-blue-600">${getDealStatusText(post.dealStatus)}</span>
-            </p>
-          </div>
-        `).join("");
+                    <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
+                        <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
+                        <a href="/post/${post.postId}" class="text-lg font-bold text-blue-600 hover:underline block mb-1">${post.title}</a>
+                        <p class="text-sm text-gray-400">
+                            ${timeAgo(post.createdDate)} ・
+                            <a href="/mypage/${post.writerName}" class="text-blue-500 hover:underline">${post.writerName}</a>님
+                        </p>
+                        <p class="text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
+                        <p class="text-sm text-gray-400">구매/판매: <span class="font-semibold">${post.buyOrSale === 'BUY' ? '구매' : '판매'}</span></p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            거래 상태: <span class="font-semibold text-blue-600">${getDealStatusText(post.dealStatus)}</span>
+                        </p>
+                    </div>
+                `).join("");
             });
 
         fetch("/api/members/me")
-            .then(res => res.ok ? res.json() : null)
+            .then(res => {
+                if (!res.ok) {
+                    return null; // 로그인 안 된 상태
+                }
+                return res.json();
+            })
             .then(data => {
+                const nav = document.getElementById("nav-right");
+
                 if (!data) {
-                    document.getElementById("nav-right").innerHTML = `
-            <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
-            <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
-          `;
+                    nav.innerHTML = `
+                        <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
+                        <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
+                    `;
                     btn.className = "bg-gray-300 text-gray-500 px-4 py-2 rounded font-semibold opacity-50 cursor-not-allowed";
                     btn.disabled = true;
                     btn.onclick = () => location.href = "/login";
                     return;
                 }
 
-                document.getElementById("nav-right").innerHTML = `
-          <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
-           <button onclick="location.href='/chat'" class="text-sm text-green-600 hover:underline">내 채팅</button>
-          <button onclick="location.href='/mypage'" class="text-sm text-blue-600 hover:underline">마이페이지</button>
-          <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
-        `;
+                nav.innerHTML = `
+                    <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
+                    <button onclick="location.href='/chat'" class="text-sm text-green-600 hover:underline">내 채팅</button>
+                    <button onclick="location.href='/mypage'" class="text-sm text-blue-600 hover:underline">마이페이지</button>
+                    <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
+                `;
 
                 btn.className = "bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded font-semibold shadow";
                 btn.disabled = false;
                 btn.onclick = () => location.href = "/writepost";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("사용자 정보를 불러오는 데 실패했습니다.");
             });
     });
 </script>
