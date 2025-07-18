@@ -1,8 +1,10 @@
 package com.example.olditemtradeplatform.security.service;
 
+import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
 import com.example.olditemtradeplatform.security.dto.LoginRequestDTO;
+import com.example.olditemtradeplatform.security.exception.AuthErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,7 @@ public class AuthService {
     public void login(LoginRequestDTO request, HttpServletRequest httpRequest) {
         try {
             UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(request.email(), request.password());
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -36,19 +38,16 @@ public class AuthService {
             createSession(httpRequest, member);
 
         } catch (DisabledException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new CustomException(AuthErrorCode.DISABLED_ACCOUNT);
 
         } catch (BadCredentialsException e) {
-            throw new RuntimeException("아이디 또는 비밀번호가 일치하지 않습니다.", e);
+            throw new CustomException(AuthErrorCode.BAD_CREDENTIALS);
 
         } catch (AuthenticationException e) {
-            String message = e.getMessage();
-            if (e.getCause() != null && e.getCause().getMessage() != null) {
-                message = e.getCause().getMessage();
-            }
-            throw new RuntimeException(message, e);
+            throw new CustomException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
     }
+
 
     private void createSession(HttpServletRequest request, Member member) {
         HttpSession session = request.getSession(true);

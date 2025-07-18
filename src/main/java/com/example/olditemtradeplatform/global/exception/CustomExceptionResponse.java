@@ -15,7 +15,7 @@ public class CustomExceptionResponse {
 
     public static CustomExceptionResponse from(BaseErrorCode code) {
         return new CustomExceptionResponse(
-                code.getCode(),
+                code.name(),
                 code.getHttpStatus().value(),
                 code.getMessage()
         );
