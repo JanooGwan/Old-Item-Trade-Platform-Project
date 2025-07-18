@@ -13,15 +13,16 @@ public class CustomException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
+    @Override
     public String getMessage() {
         return errorCode.getMessage();
     }
 
-    public int getStatusCode() {
-        return errorCode.getStatus().value();
+    public int getHttpStatus() {
+        return errorCode.getHttpStatus().value();
     }
 
     public HttpStatus getStatus() {
-        return errorCode.getStatus();
+        return errorCode.getHttpStatus();
     }
 }

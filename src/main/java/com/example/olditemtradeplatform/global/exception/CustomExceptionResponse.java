@@ -1,6 +1,7 @@
 package com.example.olditemtradeplatform.global.exception;
 
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Builder
@@ -8,12 +9,14 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CustomExceptionResponse {
 
-    int Status;
+    String code;
+    int status;
     String message;
 
     public static CustomExceptionResponse from(BaseErrorCode code) {
         return new CustomExceptionResponse(
-                code.getStatus().value(),
+                code.getCode(),
+                code.getHttpStatus().value(),
                 code.getMessage()
         );
     }
