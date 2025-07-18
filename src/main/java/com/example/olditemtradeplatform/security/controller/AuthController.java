@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final MemberService memberService;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody @Valid LoginRequestDTO request, HttpServletRequest httpRequest) {

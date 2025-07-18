@@ -45,7 +45,11 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponseDTO register(MemberRegisterRequestDTO dto, String encodedPassword) {
+    public MemberResponseDTO signup(MemberRegisterRequestDTO dto) {
+        if (!dto.getPassword().equals(dto.getPasswordConfirm())) {
+            throw new CustomException(MemberErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
+
         if (memberRepository.existsByUserId(dto.getUserId())) {
             throw new CustomException(MemberErrorCode.DUPLICATE_USER_ID);
         }
@@ -58,10 +62,14 @@ public class MemberService {
             throw new CustomException(MemberErrorCode.DUPLICATE_NICKNAME);
         }
 
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
         Member member = dto.toEntity(encodedPassword);
         memberRepository.save(member);
+
         return MemberResponseDTO.from(member);
     }
+
+
 
     @Transactional
     public MemberResponseDTO updateMember(Member member, MemberUpdateRequestDTO dto) {

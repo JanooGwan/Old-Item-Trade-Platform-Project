@@ -54,10 +54,10 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody @Valid MemberRegisterRequestDTO request) {
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
-        memberService.register(request, encodedPassword);
+        memberService.signup(request);
         return ResponseEntity.ok("회원가입 성공");
     }
+
 
     @PutMapping("/me")
     public ResponseEntity<MemberResponseDTO> updateMyInfo(
