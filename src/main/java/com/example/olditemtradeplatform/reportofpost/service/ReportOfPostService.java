@@ -23,7 +23,6 @@ public class ReportOfPostService {
     private final ReportOfPostRepository reportOfPostRepository;
     private final PostRepository postRepository;
 
-
     @Transactional
     public ReportOfPostResponseDTO reportPost(ReportOfPostRequestDTO dto, Member reporter) {
         Post post = postRepository.findById(dto.getPostId())
