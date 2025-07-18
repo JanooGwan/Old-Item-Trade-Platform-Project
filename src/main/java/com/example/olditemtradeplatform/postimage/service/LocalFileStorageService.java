@@ -1,5 +1,7 @@
 package com.example.olditemtradeplatform.postimage.service;
 
+import com.example.olditemtradeplatform.global.exception.CustomException;
+import com.example.olditemtradeplatform.postimage.exception.PostImageErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,9 +28,8 @@ public class LocalFileStorageService implements FileStorageService {
             file.transferTo(path.toFile());
 
             return "/images/" + newFileName;
-
         } catch (IOException e) {
-            throw new RuntimeException("파일 저장 실패", e);
+            throw new CustomException(PostImageErrorCode.FILE_SAVE_FAILED);
         }
     }
 }
