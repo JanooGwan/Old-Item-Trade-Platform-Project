@@ -1,8 +1,10 @@
 package com.example.olditemtradeplatform.like.service;
 
+import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.like.domain.Like;
 import com.example.olditemtradeplatform.like.domain.LikeId;
 import com.example.olditemtradeplatform.like.dto.LikeResponseDTO;
+import com.example.olditemtradeplatform.like.exception.LikeErrorCode;
 import com.example.olditemtradeplatform.like.repository.LikeRepository;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
@@ -23,9 +25,10 @@ public class LikeService {
     @Transactional
     public LikeResponseDTO createLike(Long postId, Long memberId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+                .orElseThrow(() -> new CustomException(LikeErrorCode.POST_NOT_FOUND));
+
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+                .orElseThrow(() -> new CustomException(LikeErrorCode.MEMBER_NOT_FOUND));
 
         Like like = new Like(post, member);
         likeRepository.save(like);
@@ -36,7 +39,7 @@ public class LikeService {
     @Transactional(readOnly = true)
     public LikeResponseDTO findLike(Long postId, Long memberId) {
         Like like = likeRepository.findById(new LikeId(postId, memberId))
-                .orElseThrow(() -> new IllegalArgumentException("Like not found"));
+                .orElseThrow(() -> new CustomException(LikeErrorCode.LIKE_NOT_FOUND));
         return LikeResponseDTO.from(like);
     }
 
@@ -48,7 +51,7 @@ public class LikeService {
     @Transactional
     public LikeResponseDTO toggleLike(Member member, Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+                .orElseThrow(() -> new CustomException(LikeErrorCode.POST_NOT_FOUND));
 
         LikeId likeId = new LikeId(postId, member.getId());
 
