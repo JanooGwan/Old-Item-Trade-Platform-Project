@@ -1,4 +1,4 @@
-package com.example.olditemtradeplatform.global;
+package com.example.olditemtradeplatform.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
