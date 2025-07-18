@@ -2,12 +2,14 @@ package com.example.olditemtradeplatform.member.controller;
 
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.dto.MemberPageViewResponseDTO;
+import com.example.olditemtradeplatform.member.dto.MemberRegisterRequestDTO;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
 import com.example.olditemtradeplatform.member.dto.MemberUpdateRequestDTO;
 import com.example.olditemtradeplatform.member.service.MemberService;
 import com.example.olditemtradeplatform.post.dto.PostPreviewInMypageResponseDTO;
 import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,7 +24,7 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
-
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/me")
     public ResponseEntity<MemberResponseDTO> getMyInfo(Authentication authentication) {
@@ -48,6 +50,13 @@ public class MemberController {
     @GetMapping("/mypage/{nickname}")
     public ResponseEntity<MemberPageViewResponseDTO> getOtherMemberPage(@PathVariable String nickname) {
         return ResponseEntity.ok(memberService.getOtherMemberPage(nickname));
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody @Valid MemberRegisterRequestDTO request) {
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        memberService.register(request, encodedPassword);
+        return ResponseEntity.ok("회원가입 성공");
     }
 
     @PutMapping("/me")
