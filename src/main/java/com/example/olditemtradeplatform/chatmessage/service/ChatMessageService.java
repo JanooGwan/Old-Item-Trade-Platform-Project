@@ -5,12 +5,15 @@ import com.example.olditemtradeplatform.chatmessage.domain.ChatMessageId;
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageRequestDTO;
 import com.example.olditemtradeplatform.chatmessage.dto.ChatMessageResponseDTO;
 import com.example.olditemtradeplatform.chatmessage.dto.ReadMessageResponseDTO;
+import com.example.olditemtradeplatform.chatmessage.exception.ChatMessageErrorCode;
 import com.example.olditemtradeplatform.chatmessage.repository.ChatMessageRepository;
 import com.example.olditemtradeplatform.chatroom.domain.ChatRoom;
 import com.example.olditemtradeplatform.chatroom.repository.ChatRoomRepository;
+import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +32,14 @@ public class ChatMessageService {
     @Transactional
     public ChatMessage saveChatMessage(ChatMessageRequestDTO dto) {
         ChatRoom chatRoom = chatRoomRepository.findById(dto.getChatRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("ChatRoom not found"));
+                .orElseThrow(() -> new CustomException(
+                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getMessage(),
+                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getStatus()));
+
         Member sender = memberRepository.findById(dto.getSenderId())
-                .orElseThrow(() -> new IllegalArgumentException("Sender not found"));
+                .orElseThrow(() -> new CustomException(
+                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getMessage(),
+                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getStatus()));
 
         Long nextSentAt = chatMessageRepository.countByChatroom(chatRoom) + 1;
 
@@ -47,17 +55,22 @@ public class ChatMessageService {
         return chatMessageRepository.save(message);
     }
 
-
     @Transactional(readOnly = true)
     public List<ChatMessageResponseDTO> getMessagesByRoomId(Long chatRoomId, Long memberId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(
+                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getMessage(),
+                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getStatus()));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(
+                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getMessage(),
+                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getStatus()));
 
         if (!chatRoom.hasParticipant(member)) {
-            throw new IllegalArgumentException("해당 채팅방에 접근할 수 없습니다.");
+            throw new CustomException(
+                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getMessage(),
+                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getStatus());
         }
 
         return chatMessageRepository.findByChatroomOrderBySentAtAsc(chatRoom).stream()
@@ -65,23 +78,32 @@ public class ChatMessageService {
                 .toList();
     }
 
-
     @Transactional(readOnly = true)
     public ChatMessageResponseDTO findMessage(ChatMessageId id) {
         ChatMessage message = chatMessageRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Message not found"));
+                .orElseThrow(() -> new CustomException(
+                        ChatMessageErrorCode.MESSAGE_NOT_FOUND.getMessage(),
+                        ChatMessageErrorCode.MESSAGE_NOT_FOUND.getStatus()));
+
         return ChatMessageResponseDTO.from(message);
     }
 
     @Transactional
     public void markMessagesAsRead(Long chatRoomId, Long sentAt, Long readerId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(
+                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getMessage(),
+                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getStatus()));
+
         Member reader = memberRepository.findById(readerId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(
+                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getMessage(),
+                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getStatus()));
 
         if (!chatRoom.hasParticipant(reader)) {
-            throw new IllegalArgumentException("해당 채팅방에 접근할 수 없습니다.");
+            throw new CustomException(
+                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getMessage(),
+                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getStatus());
         }
 
         List<ChatMessage> unreadMessages = chatMessageRepository
@@ -96,7 +118,6 @@ public class ChatMessageService {
                 new ReadMessageResponseDTO(chatRoomId, readerId)
         );
     }
-
 
     @Transactional
     public void deleteMessage(ChatMessageId id) {
