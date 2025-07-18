@@ -1,38 +1,46 @@
 package com.example.olditemtradeplatform.global.exception;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<Map<String, String>> handleCustomException(CustomException e) {
-        Map<String, String> error = new HashMap<>();
-        error.put("message", e.getMessage());
-
-        return ResponseEntity.status(e.getStatus()).body(error);
+    public ResponseEntity<CustomExceptionResponse> handleCustomException(CustomException ex) {
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(CustomExceptionResponse.from(ex.getErrorCode()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
-        return ResponseEntity.badRequest().body(errors);
+    public ResponseEntity<CustomExceptionResponse> handleValidation(MethodArgumentNotValidException e) {
+        String firstErrorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .findFirst()
+                .orElse("입력값 오류");
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(CustomExceptionResponse.builder()
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .message(firstErrorMessage)
+                        .build());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleUnknown(Exception e) {
-        Map<String, String> error = new HashMap<>();
-        error.put("message", "서버 오류가 발생했습니다.");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    public ResponseEntity<CustomExceptionResponse> handleGeneral(Exception e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(CustomExceptionResponse.builder()
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .message("서버 오류가 발생했습니다.")
+                        .build());
     }
 }
