@@ -46,10 +46,7 @@ public class AuthorityService {
     public void suspendMember(SuspendRequestDTO requestDto) {
         ReportOfPostId reportId = new ReportOfPostId(requestDto.getPostId(), requestDto.getReporterId());
         ReportOfPost report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new CustomException(
-                        AuthorityErrorCode.REPORT_NOT_FOUND.getMessage(),
-                        AuthorityErrorCode.REPORT_NOT_FOUND.getStatus()
-                ));
+                .orElseThrow(() -> new CustomException(AuthorityErrorCode.REPORT_NOT_FOUND));
 
         Post post = report.getPost();
         Member target = post.getWriter();
@@ -62,19 +59,13 @@ public class AuthorityService {
     @Transactional
     public void changeRole(Long memberId, String newRole) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(
-                        AuthorityErrorCode.MEMBER_NOT_FOUND.getMessage(),
-                        AuthorityErrorCode.MEMBER_NOT_FOUND.getStatus()
-                ));
+                .orElseThrow(() -> new CustomException(AuthorityErrorCode.MEMBER_NOT_FOUND));
 
         Role roleEnum;
         try {
             roleEnum = Role.valueOf(newRole.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new CustomException(
-                    AuthorityErrorCode.INVALID_ROLE.getMessage(),
-                    AuthorityErrorCode.INVALID_ROLE.getStatus()
-            );
+            throw new CustomException(AuthorityErrorCode.INVALID_ROLE);
         }
 
         member.updateRole(roleEnum);
@@ -84,10 +75,7 @@ public class AuthorityService {
     @Transactional
     public void unsuspendMember(Long memberId) {
         Member target = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(
-                        AuthorityErrorCode.MEMBER_NOT_FOUND.getMessage(),
-                        AuthorityErrorCode.MEMBER_NOT_FOUND.getStatus()
-                ));
+                .orElseThrow(() -> new CustomException(AuthorityErrorCode.MEMBER_NOT_FOUND));
 
         target.updateSuspendInfo(false, null, null);
     }

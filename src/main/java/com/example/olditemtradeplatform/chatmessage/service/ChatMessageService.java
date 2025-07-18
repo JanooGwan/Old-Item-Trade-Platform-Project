@@ -32,14 +32,10 @@ public class ChatMessageService {
     @Transactional
     public ChatMessage saveChatMessage(ChatMessageRequestDTO dto) {
         ChatRoom chatRoom = chatRoomRepository.findById(dto.getChatRoomId())
-                .orElseThrow(() -> new CustomException(
-                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getMessage(),
-                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getStatus()));
+                .orElseThrow(() -> new CustomException(ChatMessageErrorCode.MEMBER_NOT_FOUND));
 
         Member sender = memberRepository.findById(dto.getSenderId())
-                .orElseThrow(() -> new CustomException(
-                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getMessage(),
-                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getStatus()));
+                .orElseThrow(() -> new CustomException(ChatMessageErrorCode.MEMBER_NOT_FOUND));
 
         Long nextSentAt = chatMessageRepository.countByChatroom(chatRoom) + 1;
 
@@ -58,19 +54,13 @@ public class ChatMessageService {
     @Transactional(readOnly = true)
     public List<ChatMessageResponseDTO> getMessagesByRoomId(Long chatRoomId, Long memberId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new CustomException(
-                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getMessage(),
-                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getStatus()));
+                .orElseThrow(() -> new CustomException(ChatMessageErrorCode.CHATROOM_NOT_FOUND));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(
-                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getMessage(),
-                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getStatus()));
+                .orElseThrow(() -> new CustomException(ChatMessageErrorCode.MEMBER_NOT_FOUND));
 
         if (!chatRoom.hasParticipant(member)) {
-            throw new CustomException(
-                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getMessage(),
-                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getStatus());
+            throw new CustomException(ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS);
         }
 
         return chatMessageRepository.findByChatroomOrderBySentAtAsc(chatRoom).stream()
@@ -81,9 +71,7 @@ public class ChatMessageService {
     @Transactional(readOnly = true)
     public ChatMessageResponseDTO findMessage(ChatMessageId id) {
         ChatMessage message = chatMessageRepository.findById(id)
-                .orElseThrow(() -> new CustomException(
-                        ChatMessageErrorCode.MESSAGE_NOT_FOUND.getMessage(),
-                        ChatMessageErrorCode.MESSAGE_NOT_FOUND.getStatus()));
+                .orElseThrow(() -> new CustomException(ChatMessageErrorCode.MESSAGE_NOT_FOUND));
 
         return ChatMessageResponseDTO.from(message);
     }
@@ -91,19 +79,13 @@ public class ChatMessageService {
     @Transactional
     public void markMessagesAsRead(Long chatRoomId, Long sentAt, Long readerId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new CustomException(
-                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getMessage(),
-                        ChatMessageErrorCode.CHATROOM_NOT_FOUND.getStatus()));
+                .orElseThrow(() -> new CustomException(ChatMessageErrorCode.CHATROOM_NOT_FOUND));
 
         Member reader = memberRepository.findById(readerId)
-                .orElseThrow(() -> new CustomException(
-                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getMessage(),
-                        ChatMessageErrorCode.MEMBER_NOT_FOUND.getStatus()));
+                .orElseThrow(() -> new CustomException(ChatMessageErrorCode.MEMBER_NOT_FOUND));
 
         if (!chatRoom.hasParticipant(reader)) {
-            throw new CustomException(
-                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getMessage(),
-                    ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS.getStatus());
+            throw new CustomException(ChatMessageErrorCode.UNAUTHORIZED_CHAT_ACCESS);
         }
 
         List<ChatMessage> unreadMessages = chatMessageRepository
