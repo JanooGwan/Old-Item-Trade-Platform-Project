@@ -6,6 +6,7 @@ import com.example.olditemtradeplatform.chatroom.domain.ChatRoom;
 import com.example.olditemtradeplatform.member.domain.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -15,9 +16,11 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChatMessageRequestDTO {
 
+    @Positive
     @NotNull(message = "채팅방 ID는 필수입니다.")
     private Long chatRoomId;
 
+    @Positive
     @NotNull(message = "보낸 사람 ID는 필수입니다.")
     private Long senderId;
 

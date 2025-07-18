@@ -62,6 +62,7 @@
 
       const withNickname = new URLSearchParams(window.location.search).get("with");
       if (withNickname) autoEnterOrCreateRoomByNickname(withNickname);
+      window.history.replaceState({}, "", "/chat");
 
       document.getElementById("message").addEventListener("keydown", e => {
         if (e.key === "Enter") sendMessage();

@@ -50,7 +50,6 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getOtherMemberPage(nickname));
     }
 
-
     @PutMapping("/me")
     public ResponseEntity<MemberResponseDTO> updateMyInfo(
             @RequestBody MemberUpdateRequestDTO requestDto,
@@ -63,7 +62,6 @@ public class MemberController {
 
         return ResponseEntity.ok(updated);
     }
-
 
     @DeleteMapping("/me")
     public ResponseEntity<String> deleteMyAccount(Authentication authentication) {

@@ -9,6 +9,7 @@ import com.example.olditemtradeplatform.post.dto.PostUpdateRequestDTO;
 import com.example.olditemtradeplatform.post.service.PostService;
 import com.example.olditemtradeplatform.product.dto.ProductRequestDTO;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -40,8 +41,8 @@ public class PostController {
 
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<PostDetailResponseDTO> createPost(
-            @RequestPart("post") PostCreateRequestDTO postRequestDto,
-            @RequestPart("product") ProductRequestDTO productRequestDto,
+            @Valid @RequestPart("post") PostCreateRequestDTO postRequestDto,
+            @Valid @RequestPart("product") ProductRequestDTO productRequestDto,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             Authentication authentication
     ) {

@@ -2,6 +2,7 @@ package com.example.olditemtradeplatform.authority.controller;
 
 import com.example.olditemtradeplatform.authority.service.AuthorityService;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +27,7 @@ public class AdminController {
     @PostMapping("/change-role/{memberId}")
     public ResponseEntity<String> changeRole(
             @PathVariable Long memberId,
-            @RequestBody Map<String, String> body
+            @RequestBody @Valid Map<String, String> body
     ) {
         String role = body.get("role");
         authorityService.changeRole(memberId, role);

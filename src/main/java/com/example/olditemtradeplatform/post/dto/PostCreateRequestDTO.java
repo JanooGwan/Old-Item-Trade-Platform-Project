@@ -32,6 +32,7 @@ public class PostCreateRequestDTO {
     @NotNull(message = "거래 방법을 지정해주어야 합니다.")
     DealWay dealWay;
 
+
     public Post toEntity(Member writer) {
         return Post.builder()
                 .title(this.title)

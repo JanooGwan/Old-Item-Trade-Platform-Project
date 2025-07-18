@@ -5,6 +5,7 @@ import com.example.olditemtradeplatform.authority.dto.SuspendedMemberResponseDTO
 import com.example.olditemtradeplatform.authority.service.AuthorityService;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostResponseDTO;
 import com.example.olditemtradeplatform.reportofpost.service.ReportOfPostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +34,7 @@ public class ManagerController {
     }
 
     @PostMapping("/suspend")
-    public ResponseEntity<String> suspendMember(@RequestBody SuspendRequestDTO requestDto) {
+    public ResponseEntity<String> suspendMember(@RequestBody @Valid SuspendRequestDTO requestDto) {
         authorityService.suspendMember(requestDto);
         return ResponseEntity.ok("회원이 정지되었습니다.");
     }

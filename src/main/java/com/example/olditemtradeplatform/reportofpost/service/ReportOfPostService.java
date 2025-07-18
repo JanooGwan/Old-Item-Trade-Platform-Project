@@ -21,7 +21,6 @@ import java.util.List;
 public class ReportOfPostService {
 
     private final ReportOfPostRepository reportOfPostRepository;
-    private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
 

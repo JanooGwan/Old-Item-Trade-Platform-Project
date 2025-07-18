@@ -36,14 +36,12 @@ public class AuthorityService {
                 .toList();
     }
 
-
     @Transactional(readOnly = true)
     public List<MemberResponseDTO> getAllMembers() {
         return memberRepository.findAll().stream()
                 .map(MemberResponseDTO::from)
                 .toList();
     }
-
 
     @Transactional
     public void suspendMember(SuspendRequestDTO requestDto) {
@@ -56,7 +54,6 @@ public class AuthorityService {
 
         target.updateSuspendInfo(true, requestDto.getSuspendUntil(), requestDto.getSuspendReason());
         memberRepository.save(target);
-
         postRepository.delete(post);
     }
 
@@ -75,8 +72,6 @@ public class AuthorityService {
         member.updateRole(roleEnum);
         memberRepository.save(member);
     }
-
-
 
     @Transactional
     public void unsuspendMember(Long memberId) {

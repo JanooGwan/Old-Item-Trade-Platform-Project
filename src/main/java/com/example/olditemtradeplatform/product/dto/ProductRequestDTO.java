@@ -15,19 +15,19 @@ import lombok.*;
 public class ProductRequestDTO {
 
     @NotNull(message = "게시글 ID는 필수로 입력해야합니다.")
-    private Long postId;
+    Long postId;
 
     @NotBlank
     @Size(min = 1, max = 100)
-    private String name;
+    String name;
 
     @Positive(message = "가격은 0 이상이어야 합니다.")
     @NotNull(message = "수량은 필수로 입력해야 합니다.")
-    private Long count;
+    Long count;
 
     @Positive(message = "가격은 0 이상이어야 합니다.")
     @NotNull(message = "가격은 필수로 입력해야 합니다.")
-    private Long price;
+    Long price;
 
     public Product toEntity(Post post) {
         return Product.builder()

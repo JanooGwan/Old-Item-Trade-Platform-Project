@@ -15,11 +15,11 @@ import lombok.*;
 public class ReportOfPostRequestDTO {
 
     @NotNull(message = "신고할 게시글 ID는 필수로 입력해야합니다.")
-    private Long postId;
+    Long postId;
 
     @Size(max = 10000)
     @NotBlank(message = "내용은 필수로 입력해야 합니다.")
-    private String content;
+    String content;
 
     public ReportOfPost toEntity(Post post, Member reporter) {
         return new ReportOfPost(post, reporter, this.content);

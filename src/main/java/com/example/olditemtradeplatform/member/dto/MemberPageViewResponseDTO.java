@@ -13,9 +13,10 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberPageViewResponseDTO {
-    private String userId;
-    private String email;
-    private List<PostPreviewInMypageResponseDTO> posts;
+
+    String userId;
+    String email;
+    List<PostPreviewInMypageResponseDTO> posts;
 
     public static MemberPageViewResponseDTO of(Member member, List<PostPreviewInMypageResponseDTO> posts) {
         return MemberPageViewResponseDTO.builder()
