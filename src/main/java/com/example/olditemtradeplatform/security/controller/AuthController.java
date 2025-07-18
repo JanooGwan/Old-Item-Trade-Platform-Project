@@ -5,6 +5,7 @@ import com.example.olditemtradeplatform.member.service.MemberService;
 import com.example.olditemtradeplatform.security.dto.LoginRequestDTO;
 import com.example.olditemtradeplatform.security.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +21,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDTO request, HttpServletRequest httpRequest) {
+    public ResponseEntity<String> login(@RequestBody @Valid LoginRequestDTO request, HttpServletRequest httpRequest) {
         authService.login(request, httpRequest);
         return ResponseEntity.ok("로그인 성공");
     }
@@ -32,7 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody MemberRegisterRequestDTO request) {
+    public ResponseEntity<String> signup(@RequestBody @Valid MemberRegisterRequestDTO request) {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         memberService.register(request, encodedPassword);
         return ResponseEntity.ok("회원가입 성공");
