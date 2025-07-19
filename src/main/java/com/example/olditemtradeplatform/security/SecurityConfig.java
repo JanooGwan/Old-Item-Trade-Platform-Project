@@ -36,7 +36,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/auths/**", "/home", "/signup", "/login",
                                 "/css/**", "/js/**", "/images/**", "/uploads/**",
-                                "/api/members/signup", "/api/posts"
+                                "/api/members/signup", "/api/posts",
+
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
