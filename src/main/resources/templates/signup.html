@@ -19,6 +19,10 @@
             <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
         </div>
         <div>
+            <label for="passwordConfirm" class="block text-sm font-medium text-gray-700">비밀번호 확인</label>
+            <input type="password" id="passwordConfirm" name="passwordConfirm" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+        </div>
+        <div>
             <label for="nickname" class="block text-sm font-medium text-gray-700">닉네임</label>
             <input type="text" id="nickname" name="nickname" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
         </div>
@@ -37,10 +41,16 @@
     document.getElementById("signup-form").addEventListener("submit", async function (e) {
         e.preventDefault();
 
-        const userId = document.getElementById("userId").value;
+        const userId = document.getElementById("userId").value.trim();
         const password = document.getElementById("password").value;
-        const nickname = document.getElementById("nickname").value;
-        const email = document.getElementById("email").value;
+        const passwordConfirm = document.getElementById("passwordConfirm").value;
+        const nickname = document.getElementById("nickname").value.trim();
+        const email = document.getElementById("email").value.trim();
+
+        if (password !== passwordConfirm) {
+            alert("비밀번호가 일치하지 않습니다.");
+            return;
+        }
 
         try {
             const res = await fetch("/api/members/signup", {
@@ -48,7 +58,7 @@
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ userId, password, nickname, email }),
+                body: JSON.stringify({ userId, password, passwordConfirm, nickname, email }),
             });
 
             if (!res.ok) {

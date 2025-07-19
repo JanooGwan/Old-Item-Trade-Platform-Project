@@ -35,9 +35,9 @@ public class AdminController {
     }
 
     @DeleteMapping("/member/{memberId}")
-    public ResponseEntity<String> forceWithdraw(@PathVariable Long memberId) {
+    public ResponseEntity<Map<String, String>> forceWithdraw(@PathVariable Long memberId) {
         authorityService.forceWithdraw(memberId);
-        return ResponseEntity.ok("회원이 강제로 탈퇴되었습니다.");
+        return ResponseEntity.ok(Map.of("message", "회원이 강제로 탈퇴되었습니다."));
     }
 
 }

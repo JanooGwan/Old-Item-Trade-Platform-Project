@@ -9,8 +9,11 @@
         #image-modal {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
             justify-content: center;
             align-items: center;
             z-index: 50;
@@ -35,7 +38,6 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
-
 <header class="bg-white shadow-md p-4 flex justify-between items-center">
     <h1 class="text-2xl font-bold text-orange-500">대학교 중고거래마켓</h1>
     <div id="nav-right" class="space-x-4"></div>
@@ -106,6 +108,34 @@
         return `${Math.floor(diff / 86400)}일 전`;
     }
 
+    function goToPostDetail(postId) {
+        fetch("/api/members/me", { credentials: "include" })
+            .then(res => {
+                if (res.ok) {
+                    window.location.href = `/post/${postId}`;
+                } else {
+                    window.location.href = `/login?redirectTo=/post/${postId}`;
+                }
+            })
+            .catch(() => {
+                window.location.href = `/login?redirectTo=/post/${postId}`;
+            });
+    }
+
+    function goToWriterPage(writerName) {
+        fetch("/api/members/me", { credentials: "include" })
+            .then(res => {
+                if (res.ok) {
+                    window.location.href = `/mypage/${writerName}`;
+                } else {
+                    window.location.href = `/login?redirectTo=/mypage/${writerName}`;
+                }
+            })
+            .catch(() => {
+                window.location.href = `/login?redirectTo=/mypage/${writerName}`;
+            });
+    }
+
     function loadPosts(dealStatus) {
         let url = "/api/posts";
         if (dealStatus) {
@@ -126,20 +156,20 @@
                 const list = document.getElementById("post-list");
                 if (!Array.isArray(posts)) return;
                 list.innerHTML = posts.map(post => `
-                    <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
-                        <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
-                        <a href="/post/${post.postId}" class="text-lg font-bold text-blue-600 hover:underline block mb-1">${post.title}</a>
-                        <p class="text-sm text-gray-400">
-                            ${timeAgo(post.createdDate)} ・
-                            <a href="/mypage/${post.writerName}" class="text-blue-500 hover:underline">${post.writerName}님</a>
-                        </p>
-                        <p class="text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
-                        <p class="text-sm text-gray-400">구매/판매: <span class="font-semibold">${post.buyOrSale === 'BUY' ? '구매' : '판매'}</span></p>
-                        <p class="text-sm text-gray-500 mt-1">
-                            거래 상태: <span class="font-semibold text-blue-600">${getDealStatusText(post.dealStatus)}</span>
-                        </p>
-                    </div>
-                `).join("");
+          <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition">
+            <img src="${post.thumbnailImageUrl || '/img/no-image.png'}" class="w-full h-48 object-cover rounded mb-2 cursor-pointer" onclick="openImageModal('${post.thumbnailImageUrl}')"/>
+            <a href="javascript:void(0);" onclick="goToPostDetail(${post.postId})" class="text-lg font-bold text-blue-600 hover:underline block mb-1">${post.title}</a>
+            <p class="text-sm text-gray-400">
+              ${timeAgo(post.createdDate)} ・
+              <a href="javascript:void(0);" onclick="goToWriterPage('${post.writerName}')" class="text-blue-500 hover:underline">${post.writerName}님</a>
+            </p>
+            <p class="text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
+            <p class="text-sm text-gray-400">구매/판매: <span class="font-semibold">${post.buyOrSale === 'BUY' ? '구매' : '판매'}</span></p>
+            <p class="text-sm text-gray-500 mt-1">
+              거래 상태: <span class="font-semibold text-blue-600">${getDealStatusText(post.dealStatus)}</span>
+            </p>
+          </div>
+        `).join("");
             });
     }
 
@@ -163,9 +193,9 @@
 
                 if (!data) {
                     nav.innerHTML = `
-                        <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
-                        <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
-                    `;
+            <a href="/login" class="text-sm text-gray-700 hover:text-orange-500">로그인</a>
+            <a href="/signup" class="text-sm text-gray-700 hover:text-orange-500">회원가입</a>
+          `;
                     btn.className = "bg-gray-300 text-gray-500 px-4 py-2 rounded font-semibold opacity-50 cursor-not-allowed";
                     btn.disabled = true;
                     btn.onclick = () => location.href = "/login";
@@ -173,11 +203,11 @@
                 }
 
                 nav.innerHTML = `
-                    <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
-                    <button onclick="location.href='/chat'" class="text-sm text-green-600 hover:underline">내 채팅</button>
-                    <button onclick="location.href='/mypage'" class="text-sm text-blue-600 hover:underline">마이페이지</button>
-                    <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
-                `;
+          <span class="text-sm font-medium text-gray-800">${data.nickname}님, 환영합니다</span>
+          <button onclick="location.href='/chat'" class="text-sm text-green-600 hover:underline">내 채팅</button>
+          <button onclick="location.href='/mypage'" class="text-sm text-blue-600 hover:underline">마이페이지</button>
+          <button onclick="logout()" class="text-sm text-red-500 hover:underline">로그아웃</button>
+        `;
 
                 btn.className = "bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded font-semibold shadow";
                 btn.disabled = false;

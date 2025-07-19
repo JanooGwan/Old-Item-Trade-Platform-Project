@@ -34,6 +34,8 @@
         const userId = document.getElementById("userId").value;
         const password = document.getElementById("password").value;
 
+        const redirectTo = new URLSearchParams(window.location.search).get("redirectTo") || "/home";
+
         try {
             const response = await fetch("/auths/login", {
                 method: "POST",
@@ -51,7 +53,7 @@
                 return;
             }
 
-            window.location.href = "/home";
+            window.location.href = redirectTo;
         } catch (err) {
             console.error(err);
             alert("예상치 못한 오류가 발생했습니다.");
