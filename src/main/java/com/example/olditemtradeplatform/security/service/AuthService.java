@@ -27,26 +27,16 @@ public class AuthService {
 
     @Transactional
     public void login(LoginRequestDTO request, HttpServletRequest httpRequest) {
-        try {
-            UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(request.userId(), request.password());
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(request.userId(), request.password());
 
-            Authentication authentication = authenticationManager.authenticate(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        Authentication authentication = authenticationManager.authenticate(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            Member member = ((CustomUserDetails) authentication.getPrincipal()).getUser();
-            createSession(httpRequest, member);
-
-        } catch (DisabledException e) {
-            throw new CustomException(AuthErrorCode.DISABLED_ACCOUNT);
-
-        } catch (BadCredentialsException e) {
-            throw new CustomException(AuthErrorCode.BAD_CREDENTIALS);
-
-        } catch (AuthenticationException e) {
-            throw new CustomException(AuthErrorCode.AUTHENTICATION_FAILED);
-        }
+        Member member = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+        createSession(httpRequest, member);
     }
+
 
 
     private void createSession(HttpServletRequest request, Member member) {

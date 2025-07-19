@@ -3,6 +3,7 @@ package com.example.olditemtradeplatform.global.exception;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,6 +35,20 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public ResponseEntity<CustomExceptionResponse> handleInternalAuthException(InternalAuthenticationServiceException e) {
+        Throwable cause = e.getCause();
+        String message = cause != null ? cause.getMessage() : e.getMessage();
+
+        CustomExceptionResponse response = new CustomExceptionResponse(
+                "DISABLED_ACCOUNT",
+                HttpStatus.UNAUTHORIZED.value(),
+                message
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)
