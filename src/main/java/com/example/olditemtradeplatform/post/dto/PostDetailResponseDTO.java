@@ -24,6 +24,7 @@ public class PostDetailResponseDTO {
     Long likeCount;
 
     String buyOrSale;
+    String dealStatus;
     String dealWay;
     Long price;
     Long count;
@@ -50,6 +51,7 @@ public class PostDetailResponseDTO {
 
                 .buyOrSale(post.getBuyOrSale().name())
                 .dealWay(post.getDealWay().name())
+                .dealStatus(post.getDealStatus().name())
                 .price(post.getProducts().isEmpty() ? null : post.getProducts().get(0).getPrice())
                 .count(post.getProducts().isEmpty() ? null : post.getProducts().get(0).getCount())
                 .images(post.getPostImages().stream()

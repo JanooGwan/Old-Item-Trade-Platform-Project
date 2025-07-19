@@ -32,6 +32,7 @@
     <p class="text-sm text-gray-500 mb-1">조회수: <span id="view-count">0</span></p>
     <p class="text-sm text-gray-500 mb-1">구매/판매: <span id="buy-or-sale"></span></p>
     <p class="text-sm text-gray-500 mb-1">거래방법: <span id="deal-way"></span></p>
+    <p class="text-sm text-gray-500 mb-1">거래상태: <span id="deal-status"></span></p>
     <p class="text-sm text-gray-500">가격: <span id="product-price"></span>원 | 수량: <span id="product-count"></span></p>
 
     <div id="post-actions" class="mt-6 flex gap-3 hidden">
@@ -100,6 +101,15 @@
                 document.getElementById("like-count").textContent = data.likeCount ?? 0;
 
                 document.getElementById("post-time").textContent = formatRelativeTime(data.createDate, data.modifiedDate);
+
+                document.getElementById("deal-status").textContent = (function (status) {
+                    switch (status) {
+                        case "WAITING": return "거래 대기";
+                        case "IN_PROGRESS": return "예약 중";
+                        case "COMPLETED": return "거래 완료";
+                        default: return "알 수 없음";
+                    }
+                })(data.dealStatus);
 
                 const nicknameLink = document.getElementById("writer-nickname");
                 nicknameLink.textContent = data.writerName;
