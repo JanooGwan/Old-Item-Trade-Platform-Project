@@ -33,4 +33,11 @@ public class AdminController {
         authorityService.changeRole(memberId, role);
         return ResponseEntity.ok("권한이 변경되었습니다.");
     }
+
+    @DeleteMapping("/member/{memberId}")
+    public ResponseEntity<String> forceWithdraw(@PathVariable Long memberId) {
+        authorityService.forceWithdraw(memberId);
+        return ResponseEntity.ok("회원이 강제로 탈퇴되었습니다.");
+    }
+
 }

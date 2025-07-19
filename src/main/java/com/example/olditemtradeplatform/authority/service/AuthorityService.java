@@ -79,4 +79,12 @@ public class AuthorityService {
 
         target.updateSuspendInfo(false, null, null);
     }
+
+    @Transactional
+    public void forceWithdraw(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(AuthorityErrorCode.MEMBER_NOT_FOUND));
+        memberRepository.delete(member);
+    }
+
 }
