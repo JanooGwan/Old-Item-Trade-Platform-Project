@@ -33,13 +33,6 @@ public class PostController {
         return ResponseEntity.ok(post);
     }
 
-
-    @GetMapping
-    public ResponseEntity<List<PostPreviewResponseDTO>> getPosts() {
-        List<PostPreviewResponseDTO> posts = postService.getPosts();
-        return ResponseEntity.ok(posts);
-    }
-
     @GetMapping
     public ResponseEntity<List<PostPreviewResponseDTO>> getPosts(
             @RequestParam(value = "dealStatus", required = false) DealStatus dealStatus

@@ -44,7 +44,16 @@
 <main class="flex-1 container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">최근 게시글</h2>
-        <button id="write-btn" class="px-4 py-2 rounded font-semibold">게시글 쓰기</button>
+        <div class="flex items-center gap-2">
+            <label for="filter-status" class="text-sm text-gray-600">거래 상태</label>
+            <select id="filter-status" class="border rounded px-2 py-1 text-sm">
+                <option value="">전체</option>
+                <option value="WAITING">거래 대기</option>
+                <option value="IN_PROGRESS">예약 중</option>
+                <option value="COMPLETED">거래 완료</option>
+            </select>
+            <button id="write-btn" class="px-4 py-2 rounded font-semibold">게시글 쓰기</button>
+        </div>
     </div>
     <div id="post-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </main>
@@ -97,10 +106,13 @@
         return `${Math.floor(diff / 86400)}일 전`;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const btn = document.getElementById("write-btn");
+    function loadPosts(dealStatus) {
+        let url = "/api/posts";
+        if (dealStatus) {
+            url += `?dealStatus=${dealStatus}`;
+        }
 
-        fetch("/api/posts")
+        fetch(url)
             .then(res => {
                 if (!res.ok) {
                     return res.json().then(err => {
@@ -119,7 +131,7 @@
                         <a href="/post/${post.postId}" class="text-lg font-bold text-blue-600 hover:underline block mb-1">${post.title}</a>
                         <p class="text-sm text-gray-400">
                             ${timeAgo(post.createdDate)} ・
-                            <a href="/mypage/${post.writerName}" class="text-blue-500 hover:underline">${post.writerName}</a>님
+                            <a href="/mypage/${post.writerName}" class="text-blue-500 hover:underline">${post.writerName}님</a>
                         </p>
                         <p class="text-sm text-gray-400">조회수 ${post.viewCount} ・ 좋아요 ${post.likeCount}</p>
                         <p class="text-sm text-gray-400">구매/판매: <span class="font-semibold">${post.buyOrSale === 'BUY' ? '구매' : '판매'}</span></p>
@@ -129,12 +141,21 @@
                     </div>
                 `).join("");
             });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("write-btn");
+
+        loadPosts();
+
+        document.getElementById("filter-status").addEventListener("change", (e) => {
+            const selected = e.target.value;
+            loadPosts(selected);
+        });
 
         fetch("/api/members/me")
             .then(res => {
-                if (!res.ok) {
-                    return null; // 로그인 안 된 상태
-                }
+                if (!res.ok) return null;
                 return res.json();
             })
             .then(data => {
