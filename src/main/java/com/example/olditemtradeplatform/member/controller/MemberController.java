@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
-public class MemberController {
+public class MemberController implements MemberApi {
 
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;

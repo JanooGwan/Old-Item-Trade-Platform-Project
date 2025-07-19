@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/manager")
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
-public class ManagerController {
+public class ManagerController implements ManagerApi {
 
     private final AuthorityService authorityService;
     private final ReportOfPostService reportService;

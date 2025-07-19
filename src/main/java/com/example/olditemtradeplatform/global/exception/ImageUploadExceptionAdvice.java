@@ -1,4 +1,4 @@
-package com.example.olditemtradeplatform.postimage.controller;
+package com.example.olditemtradeplatform.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

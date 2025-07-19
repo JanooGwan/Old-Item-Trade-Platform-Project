@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/post-reports")
 @RequiredArgsConstructor
-public class ReportOfPostController {
+public class ReportOfPostController implements ReportOfPostApi {
 
     private final ReportOfPostService reportService;
 

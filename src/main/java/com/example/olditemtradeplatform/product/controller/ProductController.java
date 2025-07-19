@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
-public class ProductController {
+public class ProductController implements ProductApi {
 
     private final ProductService productService;
 

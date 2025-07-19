@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/likes")
-public class LikeController {
+public class LikeController implements LikeApi {
 
     private final LikeService likeService;
 

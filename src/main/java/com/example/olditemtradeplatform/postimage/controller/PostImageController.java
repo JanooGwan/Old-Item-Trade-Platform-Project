@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/post-images")
 @RequiredArgsConstructor
-public class PostImageController {
+public class PostImageController implements PostImageApi {
 
     private final PostImageService postImageService;
 

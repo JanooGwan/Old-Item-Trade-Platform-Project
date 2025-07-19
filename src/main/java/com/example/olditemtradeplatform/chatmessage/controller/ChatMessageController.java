@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/chatrooms/{roomId}/messages")
-public class ChatMessageController {
+public class ChatMessageController implements ChatMessageApi {
 
     private final ChatMessageService chatMessageService;
 

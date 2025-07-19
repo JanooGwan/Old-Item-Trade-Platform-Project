@@ -4,6 +4,7 @@ import com.example.olditemtradeplatform.authority.service.AuthorityService;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ import java.util.Map;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('ADMIN')")
-public class AdminController {
+public class AdminController implements AdminApi {
 
     private final AuthorityService authorityService;
 
