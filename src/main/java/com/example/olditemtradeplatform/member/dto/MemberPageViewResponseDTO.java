@@ -2,27 +2,19 @@ package com.example.olditemtradeplatform.member.dto;
 
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.post.dto.PostPreviewInMypageResponseDTO;
-import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
-import lombok.*;
 
 import java.util.List;
 
-
-@Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class MemberPageViewResponseDTO {
-
-    String userId;
-    String email;
-    List<PostPreviewInMypageResponseDTO> posts;
-
+public record MemberPageViewResponseDTO(
+        String userId,
+        String email,
+        List<PostPreviewInMypageResponseDTO> posts
+) {
     public static MemberPageViewResponseDTO of(Member member, List<PostPreviewInMypageResponseDTO> posts) {
-        return MemberPageViewResponseDTO.builder()
-                .userId(member.getUserId())
-                .email(member.getEmail())
-                .posts(posts)
-                .build();
+        return new MemberPageViewResponseDTO(
+                member.getUserId(),
+                member.getEmail(),
+                posts
+        );
     }
 }
