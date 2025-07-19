@@ -65,7 +65,7 @@ public class PostService {
         boolean liked = post.getLikes().stream()
                 .anyMatch(like -> like.getMember().getId().equals(currentUserId));
 
-        return PostDetailResponseDTO.from(post, isAuthor, liked);
+        return PostDetailResponseDTO.of(post, isAuthor, liked);
     }
 
     @Transactional(readOnly = true)
