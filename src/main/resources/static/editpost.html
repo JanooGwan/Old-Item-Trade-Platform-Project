@@ -63,7 +63,16 @@
             .then(data => {
                 document.getElementById("content").value = data.content;
                 document.getElementById("deal-way").value = data.dealWay;
-                document.getElementById("deal-status").value = data.dealStatus;
+
+                // 🔽 거래 상태 값을 안전하게 대문자로 변환
+                const dealStatus = (data.dealStatus || "").toUpperCase();
+                const dealStatusSelect = document.getElementById("deal-status");
+
+                // 🔽 dealStatus 값이 유효한 옵션 중 하나인지 확인
+                const isValidStatus = [...dealStatusSelect.options].some(opt => opt.value === dealStatus);
+
+                // 🔽 유효하면 설정, 아니면 기본값 선택
+                dealStatusSelect.value = isValidStatus ? dealStatus : "WAITING";
             });
     });
 

@@ -3,6 +3,7 @@ package com.example.olditemtradeplatform.post.service;
 import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.global.filesystem.FileStore;
 import com.example.olditemtradeplatform.member.domain.Member;
+import com.example.olditemtradeplatform.post.domain.DealStatus;
 import com.example.olditemtradeplatform.post.domain.Post;
 import com.example.olditemtradeplatform.post.dto.*;
 import com.example.olditemtradeplatform.post.exception.PostErrorCode;
@@ -70,6 +71,30 @@ public class PostService {
     @Transactional(readOnly = true)
     public List<PostPreviewResponseDTO> getPosts() {
         return postRepository.findAll().stream()
+                .sorted(Comparator.comparing(Post::getId).reversed())
+                .map(post -> {
+                    String thumbnail = post.getPostImages().stream()
+                            .filter(img -> img.getId().getImageAt() == 1)
+                            .map(PostImage::getImageUrl)
+                            .findFirst()
+                            .orElse(null);
+
+                    return PostPreviewResponseDTO.of(post, thumbnail);
+                })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostPreviewResponseDTO> getPosts(DealStatus dealStatus) {
+        List<Post> posts;
+
+        if (dealStatus != null) {
+            posts = postRepository.findByDealStatus(dealStatus);
+        } else {
+            posts = postRepository.findAll();
+        }
+
+        return posts.stream()
                 .sorted(Comparator.comparing(Post::getId).reversed())
                 .map(post -> {
                     String thumbnail = post.getPostImages().stream()

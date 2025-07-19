@@ -1,6 +1,7 @@
 package com.example.olditemtradeplatform.post.repository;
 
 import com.example.olditemtradeplatform.member.domain.Member;
+import com.example.olditemtradeplatform.post.domain.DealStatus;
 import com.example.olditemtradeplatform.post.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByWriterId(Long writerId);
     List<Post> findByWriter(Member writer);
+    List<Post> findByDealStatus(DealStatus dealStatus);
 
     @Modifying
     @Query("update Post p set p.viewCount = p.viewCount + 1 where p.id = :postId")

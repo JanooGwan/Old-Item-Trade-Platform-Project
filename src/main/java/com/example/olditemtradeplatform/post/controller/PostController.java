@@ -2,6 +2,7 @@ package com.example.olditemtradeplatform.post.controller;
 
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.service.MemberService;
+import com.example.olditemtradeplatform.post.domain.DealStatus;
 import com.example.olditemtradeplatform.post.dto.PostCreateRequestDTO;
 import com.example.olditemtradeplatform.post.dto.PostDetailResponseDTO;
 import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
@@ -38,6 +39,15 @@ public class PostController {
         List<PostPreviewResponseDTO> posts = postService.getPosts();
         return ResponseEntity.ok(posts);
     }
+
+    @GetMapping
+    public ResponseEntity<List<PostPreviewResponseDTO>> getPosts(
+            @RequestParam(value = "dealStatus", required = false) DealStatus dealStatus
+    ) {
+        List<PostPreviewResponseDTO> posts = postService.getPosts(dealStatus);
+        return ResponseEntity.ok(posts);
+    }
+
 
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<PostDetailResponseDTO> createPost(
