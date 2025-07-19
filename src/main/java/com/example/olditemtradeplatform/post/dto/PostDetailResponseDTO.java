@@ -35,10 +35,10 @@ public class PostDetailResponseDTO {
 
 
     public static PostDetailResponseDTO from(Post post) {
-        return from(post, false, false);
+        return of(post, false, false);
     }
 
-    public static PostDetailResponseDTO from(Post post, boolean isAuthor, boolean isLiked) {
+    public static PostDetailResponseDTO of(Post post, boolean isAuthor, boolean isLiked) {
         return PostDetailResponseDTO.builder()
                 .id(post.getId())
                 .writerName(post.getWriter().getNickname())
