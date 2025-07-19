@@ -1,13 +1,10 @@
 package com.example.olditemtradeplatform.chatmessage.dto;
 
-import lombok.*;
-
-@Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor
-public class ReadMessageResponseDTO {
-
-    private Long chatRoomId;
-    private Long readerId;
+public record ReadMessageResponseDTO(
+        Long chatRoomId,
+        Long readerId
+) {
+    public static ReadMessageResponseDTO of(Long chatRoomId, Long readerId) {
+        return new ReadMessageResponseDTO(chatRoomId, readerId);
+    }
 }

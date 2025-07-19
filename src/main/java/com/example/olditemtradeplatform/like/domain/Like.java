@@ -3,15 +3,14 @@ package com.example.olditemtradeplatform.like.domain;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.post.domain.Post;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Getter
 @Table(name = "post_like")
+@Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Like {
 
     @EmbeddedId

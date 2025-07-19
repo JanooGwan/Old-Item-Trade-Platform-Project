@@ -34,14 +34,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/auths/**", "/home", "/signup", "/login",
-                                "/css/**", "/js/**", "/images/**", "/uploads/**",
-                                "/api/members/signup", "/api/posts",
-
-                                "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs",
+                                "/swagger-ui.html", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
                         ).permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(
+                                "/", "/auths/**", "/home", "/signup", "/login",
+                                "/css/**", "/js/**", "/images/**", "/uploads/**",
+                                "/api/members/signup", "/api/posts"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)

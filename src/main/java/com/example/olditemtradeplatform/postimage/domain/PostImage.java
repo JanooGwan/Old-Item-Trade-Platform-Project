@@ -8,8 +8,8 @@ import lombok.*;
 @Entity
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class PostImage {
 
     @EmbeddedId

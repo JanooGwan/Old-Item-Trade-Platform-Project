@@ -1,13 +1,10 @@
 package com.example.olditemtradeplatform.reportofpost.domain;
 
-
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.post.domain.Post;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -16,7 +13,9 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class ReportOfPost {
 
     @EmbeddedId

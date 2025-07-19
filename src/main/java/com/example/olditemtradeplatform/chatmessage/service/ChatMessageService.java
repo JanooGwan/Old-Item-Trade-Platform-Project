@@ -31,10 +31,10 @@ public class ChatMessageService {
 
     @Transactional
     public ChatMessage saveChatMessage(ChatMessageRequestDTO dto) {
-        ChatRoom chatRoom = chatRoomRepository.findById(dto.getChatRoomId())
+        ChatRoom chatRoom = chatRoomRepository.findById(dto.chatRoomId())
                 .orElseThrow(() -> new CustomException(ChatMessageErrorCode.MEMBER_NOT_FOUND));
 
-        Member sender = memberRepository.findById(dto.getSenderId())
+        Member sender = memberRepository.findById(dto.senderId())
                 .orElseThrow(() -> new CustomException(ChatMessageErrorCode.MEMBER_NOT_FOUND));
 
         Long nextSentAt = chatMessageRepository.countByChatroom(chatRoom) + 1;
@@ -43,7 +43,7 @@ public class ChatMessageService {
                 .id(new ChatMessageId(chatRoom.getId(), nextSentAt))
                 .sender(sender)
                 .chatroom(chatRoom)
-                .content(dto.getContent())
+                .content(dto.content())
                 .isRead(false)
                 .sentAt(nextSentAt)
                 .build();
