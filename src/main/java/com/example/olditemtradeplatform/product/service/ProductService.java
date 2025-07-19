@@ -21,7 +21,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO dto) {
-        Post post = postRepository.findById(dto.getPostId())
+        Post post = postRepository.findById(dto.postId())
                 .orElseThrow(() -> new CustomException(ProductErrorCode.POST_NOT_FOUND));
 
         Product product = dto.toEntity(post);

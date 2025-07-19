@@ -25,7 +25,7 @@ public class ReportOfPostService {
 
     @Transactional
     public ReportOfPostResponseDTO reportPost(ReportOfPostRequestDTO dto, Member reporter) {
-        Post post = postRepository.findById(dto.getPostId())
+        Post post = postRepository.findById(dto.postId())
                 .orElseThrow(() -> new CustomException(ReportOfPostErrorCode.POST_NOT_FOUND));
 
         ReportOfPostId id = new ReportOfPostId(post.getId(), reporter.getId());
@@ -34,7 +34,7 @@ public class ReportOfPostService {
             throw new CustomException(ReportOfPostErrorCode.DUPLICATE_REPORT);
         }
 
-        ReportOfPost report = new ReportOfPost(post, reporter, dto.getContent());
+        ReportOfPost report = new ReportOfPost(post, reporter, dto.content());
         reportOfPostRepository.save(report);
 
         return ReportOfPostResponseDTO.from(report);

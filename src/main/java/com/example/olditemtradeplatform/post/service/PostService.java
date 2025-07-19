@@ -150,7 +150,7 @@ public class PostService {
             throw new CustomException(PostErrorCode.NOT_AUTHOR);
         }
 
-        post.updatePost(dto.getContent(), dto.getDealWay(), dto.getDealStatus());
+        post.updatePost(dto.content(), dto.dealWay(), dto.dealStatus());
     }
 
     @Transactional

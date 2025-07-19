@@ -44,14 +44,14 @@ public class AuthorityService {
 
     @Transactional
     public void suspendMember(SuspendRequestDTO requestDto) {
-        ReportOfPostId reportId = new ReportOfPostId(requestDto.getPostId(), requestDto.getReporterId());
+        ReportOfPostId reportId = new ReportOfPostId(requestDto.postId(), requestDto.reporterId());
         ReportOfPost report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new CustomException(AuthorityErrorCode.REPORT_NOT_FOUND));
 
         Post post = report.getPost();
         Member target = post.getWriter();
 
-        target.updateSuspendInfo(true, requestDto.getSuspendUntil(), requestDto.getSuspendReason());
+        target.updateSuspendInfo(true, requestDto.suspendUntil(), requestDto.suspendReason());
         memberRepository.save(target);
         postRepository.delete(post);
     }

@@ -29,7 +29,7 @@ public class AuthService {
     public void login(LoginRequestDTO request, HttpServletRequest httpRequest) {
         try {
             UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(request.getUserId(), request.getPassword());
+                    new UsernamePasswordAuthenticationToken(request.userId(), request.password());
 
             Authentication authentication = authenticationManager.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);

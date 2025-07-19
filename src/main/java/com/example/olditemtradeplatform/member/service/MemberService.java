@@ -46,23 +46,23 @@ public class MemberService {
 
     @Transactional
     public MemberResponseDTO signup(MemberRegisterRequestDTO dto) {
-        if (!dto.getPassword().equals(dto.getPasswordConfirm())) {
+        if (!dto.password().equals(dto.passwordConfirm())) {
             throw new CustomException(MemberErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
 
-        if (memberRepository.existsByUserId(dto.getUserId())) {
+        if (memberRepository.existsByUserId(dto.userId())) {
             throw new CustomException(MemberErrorCode.DUPLICATE_USER_ID);
         }
 
-        if (memberRepository.existsByEmail(dto.getEmail())) {
+        if (memberRepository.existsByEmail(dto.email())) {
             throw new CustomException(MemberErrorCode.DUPLICATE_EMAIL);
         }
 
-        if (memberRepository.existsByNickname(dto.getNickname())) {
+        if (memberRepository.existsByNickname(dto.nickname())) {
             throw new CustomException(MemberErrorCode.DUPLICATE_NICKNAME);
         }
 
-        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        String encodedPassword = passwordEncoder.encode(dto.password());
         Member member = dto.toEntity(encodedPassword);
         memberRepository.save(member);
 
@@ -76,24 +76,24 @@ public class MemberService {
         Member persistentMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(dto.getCurrentPassword(), persistentMember.getPassword())) {
+        if (!passwordEncoder.matches(dto.currentPassword(), persistentMember.getPassword())) {
             throw new CustomException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
         }
 
-        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+        if (!dto.newPassword().equals(dto.confirmPassword())) {
             throw new CustomException(MemberErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
 
-        if (memberRepository.existsByEmailAndIdNot(dto.getEmail(), member.getId())) {
+        if (memberRepository.existsByEmailAndIdNot(dto.email(), member.getId())) {
             throw new CustomException(MemberErrorCode.DUPLICATE_EMAIL);
         }
 
-        if (memberRepository.existsByNicknameAndIdNot(dto.getNickname(), member.getId())) {
+        if (memberRepository.existsByNicknameAndIdNot(dto.nickname(), member.getId())) {
             throw new CustomException(MemberErrorCode.DUPLICATE_NICKNAME);
         }
 
-        String encodedPassword = passwordEncoder.encode(dto.getNewPassword());
-        persistentMember.updateMember(encodedPassword, dto.getEmail(), dto.getNickname());
+        String encodedPassword = passwordEncoder.encode(dto.newPassword());
+        persistentMember.updateMember(encodedPassword, dto.email(), dto.nickname());
 
         return MemberResponseDTO.from(persistentMember);
     }

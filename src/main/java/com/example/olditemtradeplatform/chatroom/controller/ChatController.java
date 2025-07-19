@@ -23,13 +23,13 @@ public class ChatController {
                 chatMessageService.saveChatMessage(requestDTO)
         );
 
-        String destination = "/topic/chatroom." + responseDTO.getChatRoomId();
+        String destination = "/topic/chatroom." + responseDTO.chatRoomId();
         messagingTemplate.convertAndSend(destination, responseDTO);
     }
 
     @MessageMapping("/chat.read")
     public void notifyReadStatus(@Valid ReadMessageResponseDTO dto) {
-        messagingTemplate.convertAndSend("/topic/chatroom." + dto.getChatRoomId(), "read-update");
+        messagingTemplate.convertAndSend("/topic/chatroom." + dto.chatRoomId(), "read-update");
     }
 
 }

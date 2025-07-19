@@ -23,10 +23,10 @@ public class PostImageService {
     private final FileStorageService fileStorageService;
 
     public PostImageResponseDTO saveImage(PostImageRequestDTO dto) {
-        MultipartFile file = dto.getFile();
+        MultipartFile file = dto.file();
         String imageUrl = fileStorageService.save(file);
 
-        Post post = postRepository.findById(dto.getPostId())
+        Post post = postRepository.findById(dto.postId())
                 .orElseThrow(() -> new CustomException(PostImageErrorCode.POST_NOT_FOUND));
 
         Long imageAt = postImageRepository.countByPost(post) + 1;
