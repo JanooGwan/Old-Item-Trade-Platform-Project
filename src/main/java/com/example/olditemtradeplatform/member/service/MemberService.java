@@ -131,7 +131,7 @@ public class MemberService {
         }
         return reportRepository.findAll().stream()
                 .map(ReportOfPostResponseDTO::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -141,7 +141,7 @@ public class MemberService {
         }
         return memberRepository.findAll().stream()
                 .map(MemberResponseDTO::from)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

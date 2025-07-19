@@ -24,7 +24,6 @@ import java.util.List;
 public class MemberController implements MemberApi {
 
     private final MemberService memberService;
-    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/me")
     public ResponseEntity<MemberResponseDTO> getMyInfo(Authentication authentication) {

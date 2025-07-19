@@ -27,22 +27,22 @@ public class GlobalExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
 
-        CustomExceptionResponse response = CustomExceptionResponse.builder()
-                .code("VALIDATION_ERROR")
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(String.join(", ", messages))
-                .build();
+        CustomExceptionResponse response = new CustomExceptionResponse(
+                "VALIDATION_ERROR",
+                HttpStatus.BAD_REQUEST.value(),
+                String.join(", ", messages)
+        );
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomExceptionResponse> handleUnexpectedException(Exception e) {
-        CustomExceptionResponse response = CustomExceptionResponse.builder()
-                .code("INTERNAL_SERVER_ERROR")
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("서버 오류가 발생했습니다.")
-                .build();
+        CustomExceptionResponse response = new CustomExceptionResponse(
+                "INTERNAL_SERVER_ERROR",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "서버 오류가 발생했습니다."
+        );
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }

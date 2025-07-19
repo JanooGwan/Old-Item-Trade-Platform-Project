@@ -71,25 +71,21 @@
         const modal = document.createElement("div");
         modal.className = "fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50";
         modal.innerHTML = `
-      <div class="relative">
-        <img src="${url}" class="max-w-3xl max-h-[80vh] rounded shadow-lg" />
-        <button onclick="this.parentElement.parentElement.remove()" class="absolute top-2 right-2 text-white text-xl">✕</button>
-      </div>
-    `;
+            <div class="relative">
+                <img src="${url}" class="max-w-3xl max-h-[80vh] rounded shadow-lg" />
+                <button onclick="this.parentElement.parentElement.remove()" class="absolute top-2 right-2 text-white text-xl">✕</button>
+            </div>
+        `;
         document.body.appendChild(modal);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        const heartIcon = document.getElementById("heart-icon");
+        const likeCountSpan = document.getElementById("like-count");
+        const likeBtn = document.getElementById("like-btn");
+
         fetch(`/api/posts/${postId}`)
-            .then(res => {
-                if (!res.ok) {
-                    return res.json().then(err => {
-                        alert(err.message || "게시글 정보를 불러오는 데 실패했습니다.");
-                        throw new Error(err.message);
-                    });
-                }
-                return res.json();
-            })
+            .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.message); }))
             .then(data => {
                 document.getElementById("post-title").textContent = data.title;
                 document.getElementById("post-content").textContent = data.content;
@@ -98,30 +94,34 @@
                 document.getElementById("deal-way").textContent = data.dealWay === 'DIRECT' ? '직거래' : '택배';
                 document.getElementById("product-price").textContent = data.price ?? "-";
                 document.getElementById("product-count").textContent = data.count ?? "-";
-                document.getElementById("like-count").textContent = data.likeCount ?? 0;
 
                 document.getElementById("post-time").textContent = formatRelativeTime(data.createDate, data.modifiedDate);
 
-                document.getElementById("deal-status").textContent = (function (status) {
-                    switch (status) {
-                        case "WAITING": return "거래 대기";
-                        case "IN_PROGRESS": return "예약 중";
-                        case "COMPLETED": return "거래 완료";
-                        default: return "알 수 없음";
-                    }
-                })(data.dealStatus);
+                document.getElementById("deal-status").textContent = ({
+                    WAITING: "거래 대기",
+                    IN_PROGRESS: "예약 중",
+                    COMPLETED: "거래 완료"
+                })[data.dealStatus] || "알 수 없음";
 
                 const nicknameLink = document.getElementById("writer-nickname");
                 nicknameLink.textContent = data.writerName;
                 nicknameLink.href = `/mypage/${data.writerName}`;
 
-                const heartIcon = document.getElementById("heart-icon");
-                if (data.liked === true) {
-                    heartIcon.textContent = "❤️";
-                }
+                heartIcon.textContent = data.isLiked ? "❤️" : "♡";
+                likeCountSpan.textContent = data.likeCount ?? 0;
 
-                const gallery = document.getElementById("image-gallery");
+                likeBtn.addEventListener("click", () => {
+                    fetch(`/likes/${postId}`, { method: 'POST' })
+                        .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.message); }))
+                        .then(updated => {
+                            heartIcon.textContent = updated.liked ? "❤️" : "♡";
+                            likeCountSpan.textContent = updated.likeCount;
+                        })
+                        .catch(err => alert(err.message || "좋아요 실패"));
+                });
+
                 if (Array.isArray(data.images)) {
+                    const gallery = document.getElementById("image-gallery");
                     data.images.forEach(url => {
                         const wrapper = document.createElement("div");
                         wrapper.className = "relative w-24 h-24";
@@ -142,7 +142,7 @@
                     });
                 }
 
-                if (data.author === true) {
+                if (data.author) {
                     document.getElementById("post-actions").classList.remove("hidden");
 
                     document.getElementById("edit-btn").addEventListener("click", () => {
@@ -153,69 +153,32 @@
                         if (confirm("정말 삭제하시겠습니까?")) {
                             fetch(`/api/posts/${postId}`, { method: "DELETE" })
                                 .then(res => {
-                                    if (!res.ok) {
-                                        return res.json().then(err => {
-                                            alert(err.message || "삭제 중 오류가 발생했습니다.");
-                                            throw new Error(err.message);
-                                        });
-                                    }
+                                    if (!res.ok) return res.json().then(err => { throw new Error(err.message); });
                                     alert("삭제 완료되었습니다.");
                                     location.href = "/home";
-                                });
+                                })
+                                .catch(err => alert(err.message || "삭제 실패"));
                         }
                     });
                 } else {
                     document.getElementById("report-btn").classList.remove("hidden");
+
+                    document.getElementById("report-btn").addEventListener("click", () => {
+                        const reason = prompt("신고 사유를 입력해주세요:");
+                        if (!reason?.trim()) {
+                            alert("신고 사유를 입력해야 합니다.");
+                            return;
+                        }
+
+                        fetch("/api/post-reports", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ postId, content: reason.trim() })
+                        })
+                            .then(res => res.ok ? alert("신고가 접수되었습니다.") : res.json().then(err => { throw new Error(err.message); }))
+                            .catch(err => alert(err.message || "신고 실패"));
+                    });
                 }
-
-                const likeBtn = document.getElementById("like-btn");
-                const likeCountSpan = document.getElementById("like-count");
-
-                likeBtn.addEventListener("click", () => {
-                    fetch(`/likes/${postId}`, { method: 'POST' })
-                        .then(res => {
-                            if (!res.ok) {
-                                return res.json().then(err => {
-                                    alert(err.message || "좋아요 처리 실패");
-                                    throw new Error(err.message);
-                                });
-                            }
-                            return res.json();
-                        })
-                        .then(data => {
-                            heartIcon.textContent = data.liked ? "❤️" : "♡";
-                            likeCountSpan.textContent = data.likeCount;
-                        });
-                });
-
-                const reportBtn = document.getElementById("report-btn");
-                reportBtn.addEventListener("click", () => {
-                    const reason = prompt("신고 사유를 입력해주세요:");
-                    if (!reason || reason.trim() === "") {
-                        alert("신고 사유를 입력해야 합니다.");
-                        return;
-                    }
-
-                    fetch("/api/post-reports", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            postId: postId,
-                            content: reason.trim()
-                        })
-                    })
-                        .then(res => {
-                            if (!res.ok) {
-                                return res.json().then(err => {
-                                    alert(err.message || "신고 처리 중 오류가 발생했습니다.");
-                                    throw new Error(err.message);
-                                });
-                            }
-                            alert("신고가 접수되었습니다.");
-                        });
-                });
             })
             .catch(err => {
                 console.error(err);
