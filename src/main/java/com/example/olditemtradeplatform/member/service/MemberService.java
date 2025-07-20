@@ -40,6 +40,7 @@ public class MemberService {
         return MemberResponseDTO.from(member);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Member> findByUserId(String userId) {
         return memberRepository.findByUserId(userId);
     }
@@ -68,8 +69,6 @@ public class MemberService {
 
         return MemberResponseDTO.from(member);
     }
-
-
 
     @Transactional
     public MemberResponseDTO updateMember(Member member, MemberUpdateRequestDTO dto) {
@@ -121,26 +120,6 @@ public class MemberService {
     public List<PostPreviewResponseDTO> getLikedPosts(Member member) {
         return likeRepository.findLikedPostsByMember(member.getId()).stream()
                 .map(PostPreviewResponseDTO::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReportOfPostResponseDTO> getReportList(Member member) {
-        if (!(member.getRole() == Role.MANAGER || member.getRole() == Role.ADMIN)) {
-            throw new CustomException(MemberErrorCode.ACCESS_DENIED);
-        }
-        return reportRepository.findAll().stream()
-                .map(ReportOfPostResponseDTO::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<MemberResponseDTO> getAllMembers(Member member) {
-        if (member.getRole() != Role.ADMIN) {
-            throw new CustomException(MemberErrorCode.ACCESS_DENIED);
-        }
-        return memberRepository.findAll().stream()
-                .map(MemberResponseDTO::from)
                 .toList();
     }
 

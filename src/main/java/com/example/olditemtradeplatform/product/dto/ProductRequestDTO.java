@@ -8,14 +8,6 @@ import jakarta.validation.constraints.*;
 public record ProductRequestDTO(
 
         @Schema(
-                description = "상품이 등록될 게시글 ID",
-                example = "1",
-                requiredMode = Schema.RequiredMode.REQUIRED
-        )
-        @NotNull(message = "게시글 ID는 필수로 입력해야합니다.")
-        Long postId,
-
-        @Schema(
                 description = "상품 이름",
                 example = "아이폰 14 프로",
                 requiredMode = Schema.RequiredMode.REQUIRED

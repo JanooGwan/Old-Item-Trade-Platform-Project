@@ -33,13 +33,6 @@ public class PostService {
     private final ProductRepository productRepository;
     private final FileStore fileStore;
 
-    @Transactional
-    public PostDetailResponseDTO getPost(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
-        post.increaseViewCount();
-        return PostDetailResponseDTO.from(post);
-    }
 
     @Transactional
     public PostDetailResponseDTO getPost(Long postId, Authentication authentication) {

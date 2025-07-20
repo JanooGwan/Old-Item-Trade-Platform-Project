@@ -19,8 +19,11 @@ public interface ProductApi {
 
     @Operation(summary = "상품 등록", description = "게시글에 연결할 상품 정보를 등록합니다.")
     @ApiResponse(responseCode = "200", description = "상품 등록 성공", content = @Content(mediaType = "application/json"))
-    @PostMapping
+    @PostMapping("/{postId}")
     ResponseEntity<ProductResponseDTO> createProduct(
+            @Parameter(description = "상품이 연결될 게시글 ID", example = "1", required = true)
+            @PathVariable Long postId,
+
             @RequestBody(
                     description = "상품 등록 요청 DTO",
                     required = true,

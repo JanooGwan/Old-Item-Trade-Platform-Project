@@ -16,13 +16,15 @@ public class ProductController implements ProductApi {
     private final ProductService productService;
 
 
-    @PostMapping
+    @PostMapping("/{postId}")
     public ResponseEntity<ProductResponseDTO> createProduct(
+            @PathVariable Long postId,
             @RequestBody @Valid ProductRequestDTO dto
     ) {
-        ProductResponseDTO created = productService.createProduct(dto);
+        ProductResponseDTO created = productService.createProduct(dto, postId);
         return ResponseEntity.ok(created);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable Long id) {

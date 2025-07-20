@@ -22,6 +22,13 @@ public class PostImageService {
     private final PostImageRepository postImageRepository;
     private final FileStorageService fileStorageService;
 
+    @Transactional(readOnly = true)
+    public PostImageResponseDTO findImage(PostImageId id) {
+        PostImage postImage = postImageRepository.findById(id)
+                .orElseThrow(() -> new CustomException(PostImageErrorCode.POST_IMAGE_NOT_FOUND));
+        return PostImageResponseDTO.from(postImage);
+    }
+
     public PostImageResponseDTO saveImage(PostImageRequestDTO dto) {
         MultipartFile file = dto.file();
         String imageUrl = fileStorageService.save(file);
@@ -34,13 +41,6 @@ public class PostImageService {
         PostImage postImage = new PostImage(post, imageAt, imageUrl);
         postImageRepository.save(postImage);
 
-        return PostImageResponseDTO.from(postImage);
-    }
-
-    @Transactional(readOnly = true)
-    public PostImageResponseDTO findImage(PostImageId id) {
-        PostImage postImage = postImageRepository.findById(id)
-                .orElseThrow(() -> new CustomException(PostImageErrorCode.POST_IMAGE_NOT_FOUND));
         return PostImageResponseDTO.from(postImage);
     }
 

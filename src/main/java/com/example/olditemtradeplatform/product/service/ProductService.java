@@ -20,15 +20,14 @@ public class ProductService {
     private final PostRepository postRepository;
 
     @Transactional
-    public ProductResponseDTO createProduct(ProductRequestDTO dto) {
-        Post post = postRepository.findById(dto.postId())
-                .orElseThrow(() -> new CustomException(ProductErrorCode.POST_NOT_FOUND));
-
+    public ProductResponseDTO createProduct(ProductRequestDTO dto, Long postId) {
+        Post post = postRepository.findById(postId)
+                        .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
         Product product = dto.toEntity(post);
         productRepository.save(product);
-
         return ProductResponseDTO.from(product);
     }
+
 
     @Transactional(readOnly = true)
     public ProductResponseDTO findProduct(Long productId) {

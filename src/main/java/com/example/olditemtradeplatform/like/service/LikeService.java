@@ -22,19 +22,7 @@ public class LikeService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
-    @Transactional
-    public LikeResponseDTO createLike(Long postId, Long memberId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(LikeErrorCode.POST_NOT_FOUND));
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(LikeErrorCode.MEMBER_NOT_FOUND));
-
-        Like like = new Like(post, member);
-        likeRepository.save(like);
-
-        return LikeResponseDTO.from(like);
-    }
 
     @Transactional(readOnly = true)
     public LikeResponseDTO findLike(Long postId, Long memberId) {
@@ -43,9 +31,15 @@ public class LikeService {
         return LikeResponseDTO.from(like);
     }
 
-    @Transactional
-    public void deleteLike(Long postId, Long memberId) {
-        likeRepository.deleteById(new LikeId(postId, memberId));
+    @Transactional(readOnly = true)
+    public int countLikes(Long postId) {
+        return likeRepository.countByPostId(postId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isPostLikedByMember(Long postId, Member member) {
+        LikeId likeId = new LikeId(postId, member.getId());
+        return likeRepository.existsById(likeId);
     }
 
     @Transactional
@@ -67,14 +61,8 @@ public class LikeService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public int countLikes(Long postId) {
-        return likeRepository.countByPostId(postId);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isPostLikedByMember(Long postId, Member member) {
-        LikeId likeId = new LikeId(postId, member.getId());
-        return likeRepository.existsById(likeId);
+    @Transactional
+    public void deleteLike(Long postId, Long memberId) {
+        likeRepository.deleteById(new LikeId(postId, memberId));
     }
 }

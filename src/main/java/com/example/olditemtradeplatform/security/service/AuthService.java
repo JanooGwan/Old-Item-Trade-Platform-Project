@@ -4,16 +4,12 @@ import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
 import com.example.olditemtradeplatform.security.dto.LoginRequestDTO;
-import com.example.olditemtradeplatform.security.exception.AuthErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +32,6 @@ public class AuthService {
         Member member = ((CustomUserDetails) authentication.getPrincipal()).getUser();
         createSession(httpRequest, member);
     }
-
-
 
     private void createSession(HttpServletRequest request, Member member) {
         HttpSession session = request.getSession(true);

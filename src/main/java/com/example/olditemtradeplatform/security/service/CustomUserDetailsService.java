@@ -28,7 +28,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         return userDetails;
     }
 
-
     private void checkIfAccountIsSuspended(Member member) {
         if (member.isSuspendedNow()) {
             String until = member.getSuspendUntil().toString();

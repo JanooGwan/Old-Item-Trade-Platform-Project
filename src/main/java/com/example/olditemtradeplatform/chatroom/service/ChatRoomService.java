@@ -30,7 +30,7 @@ public class ChatRoomService {
         List<ChatRoom> rooms = chatRoomRepository.findByMember1OrMember2(member, member);
         return rooms.stream()
                 .map(room -> ChatRoomResponseDTO.from(room, memberId))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional

@@ -23,6 +23,20 @@ public class ReportOfPostService {
     private final ReportOfPostRepository reportOfPostRepository;
     private final PostRepository postRepository;
 
+    @Transactional(readOnly = true)
+    public List<ReportOfPostResponseDTO> getReports() {
+        return reportOfPostRepository.findAll().stream()
+                .map(ReportOfPostResponseDTO::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ReportOfPostResponseDTO findReport(Long postId, Long reporterId) {
+        ReportOfPost report = reportOfPostRepository.findById(new ReportOfPostId(postId, reporterId))
+                .orElseThrow(() -> new CustomException(ReportOfPostErrorCode.REPORT_NOT_FOUND));
+        return ReportOfPostResponseDTO.from(report);
+    }
+
     @Transactional
     public ReportOfPostResponseDTO reportPost(ReportOfPostRequestDTO dto, Member reporter) {
         Post post = postRepository.findById(dto.postId())
@@ -37,20 +51,6 @@ public class ReportOfPostService {
         ReportOfPost report = new ReportOfPost(post, reporter, dto.content());
         reportOfPostRepository.save(report);
 
-        return ReportOfPostResponseDTO.from(report);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReportOfPostResponseDTO> getReports() {
-        return reportOfPostRepository.findAll().stream()
-                .map(ReportOfPostResponseDTO::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public ReportOfPostResponseDTO findReport(Long postId, Long reporterId) {
-        ReportOfPost report = reportOfPostRepository.findById(new ReportOfPostId(postId, reporterId))
-                .orElseThrow(() -> new CustomException(ReportOfPostErrorCode.REPORT_NOT_FOUND));
         return ReportOfPostResponseDTO.from(report);
     }
 
