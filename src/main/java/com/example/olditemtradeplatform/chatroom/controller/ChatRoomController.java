@@ -7,6 +7,7 @@ import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,24 +23,26 @@ public class ChatRoomController implements ChatRoomApi {
     private final MemberRepository memberRepository;
 
     @GetMapping
-    public List<ChatRoomResponseDTO> getMyChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<List<ChatRoomResponseDTO>> getMyChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMember().getId();
-        return chatRoomService.getChatRoomsByMemberId(memberId);
+        List<ChatRoomResponseDTO> chatRooms = chatRoomService.getChatRoomsByMemberId(memberId);
+        return ResponseEntity.ok(chatRooms);
     }
 
     @PostMapping("/enter")
-    public ChatRoomResponseDTO enterChatRoom(
+    public ResponseEntity<ChatRoomResponseDTO> enterChatRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody Map<String, Long> body
     ) {
         Long me = userDetails.getMember().getId();
         Long other = body.get("memberId");
+
         ChatRoom room = chatRoomService.getOrCreateChatRoom(me, other);
-        return ChatRoomResponseDTO.from(room, me);
+        return ResponseEntity.ok(ChatRoomResponseDTO.from(room, me));
     }
 
     @PostMapping("/enter-by-nickname")
-    public ChatRoomResponseDTO enterChatRoomByNickname(
+    public ResponseEntity<ChatRoomResponseDTO> enterChatRoomByNickname(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody Map<String, String> body
     ) {
@@ -50,6 +53,6 @@ public class ChatRoomController implements ChatRoomApi {
                 .orElseThrow(() -> new IllegalArgumentException("상대방 닉네임을 찾을 수 없습니다."));
 
         ChatRoom room = chatRoomService.getOrCreateChatRoom(me.getId(), target.getId());
-        return ChatRoomResponseDTO.from(room, me.getId());
+        return ResponseEntity.ok(ChatRoomResponseDTO.from(room, me.getId()));
     }
 }
