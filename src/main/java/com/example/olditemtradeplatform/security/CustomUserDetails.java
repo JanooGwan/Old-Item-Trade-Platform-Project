@@ -24,7 +24,6 @@ public class CustomUserDetails implements UserDetails {
         return List.of(new SimpleGrantedAuthority(member.getRole().toString()));
     }
 
-
     @Override
     public String getPassword() {
         return member.getPassword();

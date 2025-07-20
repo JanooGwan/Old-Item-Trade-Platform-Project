@@ -19,8 +19,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final com.example.olditemtradeplatform.security.handler.CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final com.example.olditemtradeplatform.security.handler.CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomUserDetailsService userDetailsService;
 
     @Bean

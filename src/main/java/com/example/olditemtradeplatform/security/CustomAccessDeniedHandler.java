@@ -1,4 +1,4 @@
-package com.example.olditemtradeplatform.security.handler;
+package com.example.olditemtradeplatform.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

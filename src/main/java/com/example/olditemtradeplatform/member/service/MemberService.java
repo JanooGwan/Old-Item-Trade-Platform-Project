@@ -14,7 +14,10 @@ import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
 import com.example.olditemtradeplatform.post.repository.PostRepository;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostResponseDTO;
 import com.example.olditemtradeplatform.reportofpost.repository.ReportOfPostRepository;
+import com.example.olditemtradeplatform.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,8 +97,23 @@ public class MemberService {
         String encodedPassword = passwordEncoder.encode(dto.newPassword());
         persistentMember.updateMember(encodedPassword, dto.email(), dto.nickname());
 
+        updateAuthentication(persistentMember);
+
         return MemberResponseDTO.from(persistentMember);
     }
+
+    private void updateAuthentication(Member updatedMember) {
+        CustomUserDetails updatedUserDetails = new CustomUserDetails(updatedMember);
+
+        UsernamePasswordAuthenticationToken newAuth =
+                new UsernamePasswordAuthenticationToken(
+                        updatedUserDetails,
+                        null,
+                        updatedUserDetails.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+    }
+
 
     @Transactional(readOnly = true)
     public List<PostPreviewInMypageResponseDTO> getMyPosts(Member member) {
