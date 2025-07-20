@@ -23,6 +23,7 @@ public class ReportOfPostService {
     private final ReportOfPostRepository reportOfPostRepository;
     private final PostRepository postRepository;
 
+
     @Transactional(readOnly = true)
     public List<ReportOfPostResponseDTO> getReports() {
         return reportOfPostRepository.findAll().stream()
@@ -34,6 +35,7 @@ public class ReportOfPostService {
     public ReportOfPostResponseDTO findReport(Long postId, Long reporterId) {
         ReportOfPost report = reportOfPostRepository.findById(new ReportOfPostId(postId, reporterId))
                 .orElseThrow(() -> new CustomException(ReportOfPostErrorCode.REPORT_NOT_FOUND));
+
         return ReportOfPostResponseDTO.from(report);
     }
 

@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LikeService {
 
     private final LikeRepository likeRepository;
-    private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-
-
 
     @Transactional(readOnly = true)
     public LikeResponseDTO findLike(Long postId, Long memberId) {

@@ -4,7 +4,6 @@ import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.like.domain.Like;
 import com.example.olditemtradeplatform.like.repository.LikeRepository;
 import com.example.olditemtradeplatform.member.domain.Member;
-import com.example.olditemtradeplatform.member.domain.Role;
 import com.example.olditemtradeplatform.member.dto.*;
 import com.example.olditemtradeplatform.member.exception.MemberErrorCode;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
@@ -12,8 +11,6 @@ import com.example.olditemtradeplatform.post.domain.Post;
 import com.example.olditemtradeplatform.post.dto.PostPreviewInMypageResponseDTO;
 import com.example.olditemtradeplatform.post.dto.PostPreviewResponseDTO;
 import com.example.olditemtradeplatform.post.repository.PostRepository;
-import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostResponseDTO;
-import com.example.olditemtradeplatform.reportofpost.repository.ReportOfPostRepository;
 import com.example.olditemtradeplatform.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,19 +28,22 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
     private final LikeRepository likeRepository;
-    private final ReportOfPostRepository reportRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public MemberResponseDTO findById(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
         return MemberResponseDTO.from(member);
     }
 
     @Transactional(readOnly = true)
-    public Optional<Member> findByUserId(String userId) {
-        return memberRepository.findByUserId(userId);
+    public MemberResponseDTO findByUserId(String userId) {
+        Member member = memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        return MemberResponseDTO.from(member);
     }
 
     @Transactional
@@ -113,7 +111,6 @@ public class MemberService {
 
         SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
-
 
     @Transactional(readOnly = true)
     public List<PostPreviewInMypageResponseDTO> getMyPosts(Member member) {

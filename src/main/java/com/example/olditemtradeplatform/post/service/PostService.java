@@ -131,6 +131,7 @@ public class PostService {
     public PostResponseDTO findPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
+
         return PostResponseDTO.from(post);
     }
 
