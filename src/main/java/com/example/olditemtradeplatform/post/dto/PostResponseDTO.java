@@ -6,7 +6,7 @@ import com.example.olditemtradeplatform.postimage.domain.PostImage;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record PostDetailResponseDTO(
+public record PostResponseDTO(
         Long id,
         String writerName,
         String title,
@@ -24,12 +24,12 @@ public record PostDetailResponseDTO(
         boolean isAuthor,
         boolean isLiked
 ) {
-    public static PostDetailResponseDTO from(Post post) {
+    public static PostResponseDTO from(Post post) {
         return of(post, false, false);
     }
 
-    public static PostDetailResponseDTO of(Post post, boolean isAuthor, boolean isLiked) {
-        return new PostDetailResponseDTO(
+    public static PostResponseDTO of(Post post, boolean isAuthor, boolean isLiked) {
+        return new PostResponseDTO(
                 post.getId(),
                 post.getWriter().getNickname(),
                 post.getTitle(),

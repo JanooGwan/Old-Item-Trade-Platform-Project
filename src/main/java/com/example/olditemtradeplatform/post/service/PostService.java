@@ -35,7 +35,7 @@ public class PostService {
 
 
     @Transactional
-    public PostDetailResponseDTO getPost(Long postId, Authentication authentication) {
+    public PostResponseDTO getPost(Long postId, Authentication authentication) {
         Long currentUserId;
 
         if (authentication != null && authentication.isAuthenticated()) {
@@ -58,7 +58,7 @@ public class PostService {
         boolean liked = post.getLikes().stream()
                 .anyMatch(like -> like.getMember().getId().equals(currentUserId));
 
-        return PostDetailResponseDTO.of(post, isAuthor, liked);
+        return PostResponseDTO.of(post, isAuthor, liked);
     }
 
     @Transactional(readOnly = true)
@@ -102,7 +102,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostDetailResponseDTO createPost(Member writer, PostCreateRequestDTO postDto, ProductRequestDTO productDto, List<MultipartFile> images) {
+    public PostResponseDTO createPost(Member writer, PostCreateRequestDTO postDto, ProductRequestDTO productDto, List<MultipartFile> images) {
         Post post = postDto.toEntity(writer);
         Post savedPost = postRepository.save(post);
 
@@ -124,18 +124,18 @@ public class PostService {
             }
         }
 
-        return PostDetailResponseDTO.from(savedPost);
+        return PostResponseDTO.from(savedPost);
     }
 
     @Transactional(readOnly = true)
-    public PostDetailResponseDTO findPost(Long postId) {
+    public PostResponseDTO findPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
-        return PostDetailResponseDTO.from(post);
+        return PostResponseDTO.from(post);
     }
 
     @Transactional
-    public void updatePost(Long postId, PostUpdateRequestDTO dto, Long requesterId) {
+    public PostResponseDTO updatePost(Long postId, PostUpdateRequestDTO dto, Long requesterId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
 
@@ -144,6 +144,8 @@ public class PostService {
         }
 
         post.updatePost(dto.content(), dto.dealWay(), dto.dealStatus());
+
+        return PostResponseDTO.from(post);
     }
 
     @Transactional

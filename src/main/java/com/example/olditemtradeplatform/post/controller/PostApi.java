@@ -26,7 +26,7 @@ public interface PostApi {
     @Operation(summary = "게시글 단건 조회", description = "게시글 ID로 게시글을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공", content = @Content(mediaType = "application/json"))
     @GetMapping("/{postId}")
-    ResponseEntity<PostDetailResponseDTO> getPost(
+    ResponseEntity<PostResponseDTO> getPost(
             @Parameter(description = "게시글 ID", example = "1")
             @PathVariable Long postId,
 
@@ -50,7 +50,7 @@ public interface PostApi {
     @PostMapping(consumes = {"multipart/form-data"})
     @Operation(summary = "게시글 생성", description = "게시글, 상품 정보, 이미지 파일을 포함한 게시글을 생성합니다. (multipart/form-data)")
     @ApiResponse(responseCode = "200", description = "생성 성공", content = @Content(mediaType = "application/json"))
-    ResponseEntity<PostDetailResponseDTO> createPost(
+    ResponseEntity<PostResponseDTO> createPost(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "게시글 작성 요청 DTO",
                     required = true,
@@ -72,11 +72,10 @@ public interface PostApi {
             Authentication authentication
     );
 
-
     @Operation(summary = "게시글 수정", description = "게시글 ID를 기반으로 게시글을 수정합니다. 작성자만 수정할 수 있습니다.")
-    @ApiResponse(responseCode = "204", description = "수정 성공")
+    @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(mediaType = "application/json"))
     @PutMapping("/{postId}")
-    ResponseEntity<Void> updatePost(
+    ResponseEntity<PostResponseDTO> updatePost(
             @Parameter(description = "게시글 ID", example = "1")
             @PathVariable Long postId,
 
