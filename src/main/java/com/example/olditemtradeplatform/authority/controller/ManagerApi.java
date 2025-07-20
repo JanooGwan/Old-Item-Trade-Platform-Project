@@ -1,12 +1,11 @@
 package com.example.olditemtradeplatform.authority.controller;
 
 import com.example.olditemtradeplatform.authority.dto.SuspendRequestDTO;
-import com.example.olditemtradeplatform.authority.dto.SuspendedMemberResponseDTO;
+import com.example.olditemtradeplatform.authority.dto.SuspendStatusResponseDTO;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,25 +26,28 @@ public interface ManagerApi {
     @Operation(summary = "정지된 회원 목록 조회", description = "현재 정지된 회원 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "정지 회원 목록 조회 성공", content = @Content(mediaType = "application/json"))
     @GetMapping("/suspended-members")
-    ResponseEntity<List<SuspendedMemberResponseDTO>> getSuspendedMembers();
+    ResponseEntity<List<SuspendStatusResponseDTO>> getSuspendedMembers();
 
     @Operation(summary = "회원 정지", description = "특정 회원을 정지합니다.")
     @ApiResponse(responseCode = "200", description = "회원 정지 성공", content = @Content(mediaType = "application/json"))
-    @PostMapping("/suspend")
-    ResponseEntity<String> suspendMember(
-            @RequestBody(
-                    description = "정지할 회원의 정보 및 정지 기한",
+    @PostMapping("/suspend/{memberId}")
+    ResponseEntity<SuspendStatusResponseDTO> suspendMember(
+            @Parameter(description = "정지할 회원의 ID", example = "42")
+            @PathVariable Long memberId,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "정지 기한 및 사유",
                     required = true,
                     content = @Content(mediaType = "application/json")
             )
-            @Valid @org.springframework.web.bind.annotation.RequestBody SuspendRequestDTO requestDto
+            @Valid @RequestBody SuspendRequestDTO requestDto
     );
 
     @Operation(summary = "회원 정지 해제", description = "특정 회원의 정지를 해제합니다.")
     @ApiResponse(responseCode = "200", description = "회원 정지 해제 성공", content = @Content(mediaType = "application/json"))
     @PostMapping("/unsuspend/{memberId}")
-    ResponseEntity<String> unsuspendMember(
-            @Parameter(description = "정지 해제할 회원의 ID", example = "1")
+    ResponseEntity<SuspendStatusResponseDTO> unsuspendMember(
+            @Parameter(description = "정지 해제할 회원의 ID", example = "42")
             @PathVariable Long memberId
     );
 

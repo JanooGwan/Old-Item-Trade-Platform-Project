@@ -77,16 +77,16 @@ public class Member {
     }
 
     // 정지 시
-    public void updateSuspendInfo(boolean isSuspended, LocalDate until, String reason) {
-        this.isSuspended = isSuspended;
+    public void suspendMember(LocalDate until, String reason) {
+        this.isSuspended = true;
         this.suspendUntil = until;
         this.suspendReason = reason;
     }
 
     // 정지 해제 시
-    public void updateSuspendInfo(boolean isSuspended, LocalDate until) {
-        this.isSuspended = isSuspended;
-        this.suspendUntil = until;
+    public void unsuspendMember() {
+        this.isSuspended = false;
+        this.suspendUntil = null;
         this.suspendReason = null;
     }
 

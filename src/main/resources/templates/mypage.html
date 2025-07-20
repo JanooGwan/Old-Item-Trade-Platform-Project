@@ -132,15 +132,15 @@
         until.setDate(until.getDate() + parseInt(days));
 
         try {
-            await fetchWithErrorHandling("/api/manager/suspend", {
+            await fetchWithErrorHandling(`/api/manager/suspend/${reporterId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    postId, reporterId,
                     suspendUntil: until.toISOString().split("T")[0],
                     suspendReason: reason
                 })
             });
+
             window.location.reload();
         } catch (err) {
             alert(err.message);
@@ -165,7 +165,7 @@
             members.forEach(member => {
                 const html = `👤 ${member.nickName} / 아이디 : ${member.userId} / 정지기한: ${member.suspendUntil || '없음'}<br>
                     사유: ${member.suspendReason || '없음'}<br>
-                    <button onclick="unsuspend(${member.userId}, '${member.nickName}')" class="bg-blue-500 text-white px-2 py-1 rounded">정지 해제</button>`;
+                    <button onclick="unsuspend('${member.userId}', '${member.nickName}')" class="bg-blue-500 text-white px-2 py-1 rounded">정지 해제</button>`;
                 list.appendChild(createListItem(html));
             });
         } catch (err) {

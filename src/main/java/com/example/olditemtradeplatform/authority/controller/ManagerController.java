@@ -1,7 +1,7 @@
 package com.example.olditemtradeplatform.authority.controller;
 
 import com.example.olditemtradeplatform.authority.dto.SuspendRequestDTO;
-import com.example.olditemtradeplatform.authority.dto.SuspendedMemberResponseDTO;
+import com.example.olditemtradeplatform.authority.dto.SuspendStatusResponseDTO;
 import com.example.olditemtradeplatform.authority.service.AuthorityService;
 import com.example.olditemtradeplatform.reportofpost.dto.ReportOfPostResponseDTO;
 import com.example.olditemtradeplatform.reportofpost.service.ReportOfPostService;
@@ -29,21 +29,27 @@ public class ManagerController implements ManagerApi {
     }
 
     @GetMapping("/suspended-members")
-    public ResponseEntity<List<SuspendedMemberResponseDTO>> getSuspendedMembers() {
+    public ResponseEntity<List<SuspendStatusResponseDTO>> getSuspendedMembers() {
         return ResponseEntity.ok(authorityService.getSuspendedMembers());
     }
 
-    @PostMapping("/suspend")
-    public ResponseEntity<String> suspendMember(@RequestBody @Valid SuspendRequestDTO requestDto) {
-        authorityService.suspendMember(requestDto);
-        return ResponseEntity.ok("회원이 정지되었습니다.");
+    @PostMapping("/suspend/{memberId}")
+    public ResponseEntity<SuspendStatusResponseDTO> suspendMember(
+            @PathVariable Long memberId,
+            @RequestBody @Valid SuspendRequestDTO requestDto
+    ) {
+        SuspendStatusResponseDTO response = authorityService.suspendMember(memberId, requestDto);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/unsuspend/{memberId}")
-    public ResponseEntity<String> unsuspendMember(@PathVariable Long memberId) {
-        authorityService.unsuspendMember(memberId);
-        return ResponseEntity.ok("회원 정지가 해제되었습니다.");
+    public ResponseEntity<SuspendStatusResponseDTO> unsuspendMember(
+            @PathVariable Long memberId
+    ) {
+        SuspendStatusResponseDTO response = authorityService.unsuspendMember(memberId);
+        return ResponseEntity.ok(response);
     }
+
 
     @DeleteMapping("/post-reports/{postId}/{reporterId}")
     public ResponseEntity<Void> dismissReport(

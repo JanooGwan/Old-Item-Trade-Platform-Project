@@ -1,18 +1,14 @@
 package com.example.olditemtradeplatform.authority.service;
 
 import com.example.olditemtradeplatform.authority.dto.SuspendRequestDTO;
-import com.example.olditemtradeplatform.authority.dto.SuspendedMemberResponseDTO;
+import com.example.olditemtradeplatform.authority.dto.SuspendStatusResponseDTO;
 import com.example.olditemtradeplatform.authority.exception.AuthorityErrorCode;
 import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.member.domain.Member;
 import com.example.olditemtradeplatform.member.domain.Role;
 import com.example.olditemtradeplatform.member.dto.MemberResponseDTO;
+import com.example.olditemtradeplatform.member.exception.MemberErrorCode;
 import com.example.olditemtradeplatform.member.repository.MemberRepository;
-import com.example.olditemtradeplatform.post.domain.Post;
-import com.example.olditemtradeplatform.post.repository.PostRepository;
-import com.example.olditemtradeplatform.reportofpost.domain.ReportOfPost;
-import com.example.olditemtradeplatform.reportofpost.domain.ReportOfPostId;
-import com.example.olditemtradeplatform.reportofpost.repository.ReportOfPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +20,12 @@ import java.util.List;
 public class AuthorityService {
 
     private final MemberRepository memberRepository;
-    private final PostRepository postRepository;
-    private final ReportOfPostRepository reportRepository;
 
     @Transactional(readOnly = true)
-    public List<SuspendedMemberResponseDTO> getSuspendedMembers() {
+    public List<SuspendStatusResponseDTO> getSuspendedMembers() {
         return memberRepository.findAll().stream()
                 .filter(Member::isSuspended)
-                .map(SuspendedMemberResponseDTO::from)
+                .map(SuspendStatusResponseDTO::from)
                 .toList();
     }
 
@@ -43,18 +37,23 @@ public class AuthorityService {
     }
 
     @Transactional
-    public void suspendMember(SuspendRequestDTO requestDto) {
-        ReportOfPostId reportId = new ReportOfPostId(requestDto.postId(), requestDto.reporterId());
-        ReportOfPost report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new CustomException(AuthorityErrorCode.REPORT_NOT_FOUND));
+    public SuspendStatusResponseDTO suspendMember(Long memberId, SuspendRequestDTO dto) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        Post post = report.getPost();
-        Member target = post.getWriter();
-
-        target.updateSuspendInfo(true, requestDto.suspendUntil(), requestDto.suspendReason());
-        memberRepository.save(target);
-        postRepository.delete(post);
+        member.suspendMember(dto.suspendUntil(), dto.suspendReason());
+        return SuspendStatusResponseDTO.from(member);
     }
+
+    @Transactional
+    public SuspendStatusResponseDTO unsuspendMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(AuthorityErrorCode.MEMBER_NOT_FOUND));
+
+        member.unsuspendMember();
+        return SuspendStatusResponseDTO.from(member);
+    }
+
 
     @Transactional
     public void changeRole(Long memberId, String newRole) {
@@ -73,18 +72,9 @@ public class AuthorityService {
     }
 
     @Transactional
-    public void unsuspendMember(Long memberId) {
-        Member target = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(AuthorityErrorCode.MEMBER_NOT_FOUND));
-
-        target.updateSuspendInfo(false, null, null);
-    }
-
-    @Transactional
     public void forceWithdraw(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(AuthorityErrorCode.MEMBER_NOT_FOUND));
         memberRepository.delete(member);
     }
-
 }
