@@ -42,16 +42,9 @@
 
   window.onload = () => {
     fetch("/api/members/me")
-            .then(res => {
-              if (!res.ok) {
-                return res.json().then(err => {
-                  alert(err.message || "로그인이 필요합니다.");
-                  window.location.href = "/login";
-                  throw new Error(err.message);
-                });
-              }
-              return res.json();
-            })
+            .then(res => res.ok ? res.json() : res.json().then(err => {
+              alert(err.message || "로그인이 필요합니다."); window.location.href = "/login"; throw new Error(err.message);
+            }))
             .then(data => {
               currentUserId = data.id;
               connect();
@@ -77,15 +70,10 @@
 
   function fetchChatRooms() {
     fetch("/api/chatrooms")
-            .then(res => {
-              if (!res.ok) {
-                return res.json().then(err => {
-                  alert(err.message || "채팅방 목록을 불러오지 못했습니다.");
-                  throw new Error(err.message);
-                });
-              }
-              return res.json();
-            })
+            .then(res => res.ok ? res.json() : res.json().then(err => {
+              alert(err.message || "채팅방 목록을 불러오지 못했습니다.");
+              throw new Error(err.message);
+            }))
             .then(data => {
               const list = document.getElementById("chatroom-list");
               list.innerHTML = "";
@@ -105,15 +93,10 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nickname })
     })
-            .then(res => {
-              if (!res.ok) {
-                return res.json().then(err => {
-                  alert(err.message || "채팅방 생성 실패");
-                  throw new Error(err.message);
-                });
-              }
-              return res.json();
-            })
+            .then(res => res.ok ? res.json() : res.json().then(err => {
+              alert(err.message || "채팅방 생성 실패");
+              throw new Error(err.message);
+            }))
             .then(data => {
               if (data.roomId) enterChatRoom(data.roomId);
               else alert("채팅방 정보를 불러올 수 없습니다.");
@@ -124,42 +107,43 @@
     currentChatRoomId = roomId;
     if (currentSubscription) currentSubscription.unsubscribe();
     document.getElementById("message-list").innerHTML = "";
-    loadMessagesAndMarkAsRead(roomId);
+    fetchMessages();
 
     currentSubscription = stompClient.subscribe(`/topic/chatroom.${roomId}`, (messageOutput) => {
-      const body = messageOutput.body;
       try {
-        const data = JSON.parse(body);
+        const data = JSON.parse(messageOutput.body);
         if (data.readerId) {
-          loadMessagesAndMarkAsRead(currentChatRoomId);
+          appendReadLabel(data.readerId);
         } else {
-          loadMessagesAndMarkAsRead(currentChatRoomId);
+          displayMessage(data);
+          markMessageAsRead(data);
         }
       } catch (e) {
-        loadMessagesAndMarkAsRead(currentChatRoomId);
+        console.error("메시지 파싱 오류", e);
       }
     });
+
   }
 
-  function loadMessagesAndMarkAsRead(roomId) {
-    fetch(`/api/chatrooms/${roomId}/messages`)
-            .then(res => {
-              if (!res.ok) {
-                return res.json().then(err => {
-                  alert(err.message || "메시지 불러오기 실패");
-                  throw new Error(err.message);
-                });
-              }
-              return res.json();
-            })
+  function fetchMessages() {
+    fetch(`/api/chatrooms/${currentChatRoomId}/messages`)
+            .then(res => res.ok ? res.json() : res.json().then(err => {
+              alert(err.message || "메시지 불러오기 실패");
+              throw new Error(err.message);
+            }))
             .then(messages => {
               document.getElementById("message-list").innerHTML = "";
               updateMyLastSentReadMessageSentAt(messages);
-              messages.forEach(displayMessage);
+
+              messages.forEach(msg => {
+                displayMessage(msg);
+                markMessageAsRead(msg);
+              });
+
               appendReadLabel();
-              markMessagesAsRead(messages);
             });
   }
+
 
   function updateMyLastSentReadMessageSentAt(messages) {
     const readByOtherPartyMessages = messages.filter(
@@ -177,7 +161,6 @@
     const wrapper = document.createElement("div");
     wrapper.classList.add("message");
     wrapper.classList.add(msg.senderId === currentUserId ? "my-message" : "other-message");
-
     wrapper.dataset.sentat = msg.sentAt;
 
     const contentDiv = document.createElement("div");
@@ -188,14 +171,14 @@
     list.scrollTop = list.scrollHeight;
   }
 
-  function appendReadLabel() {
+  function appendReadLabel(readerId = null) {
     if (myLastSentReadMessageSentAt === -1) return;
 
     const list = document.getElementById("message-list");
     const messageElements = Array.from(list.children);
 
     const lastReadElement = messageElements.find(el =>
-            el.dataset && el.dataset.sentat === myLastSentReadMessageSentAt
+            el.dataset && el.dataset.sentat === myLastSentReadMessageSentAt.toString()
     );
 
     if (!lastReadElement) return;
@@ -203,8 +186,8 @@
     const read = document.createElement("div");
     read.classList.add("read-label");
     read.innerText = "읽음";
-
     lastReadElement.insertAdjacentElement('afterend', read);
+
     list.scrollTop = list.scrollHeight;
   }
 
@@ -222,26 +205,14 @@
     document.getElementById("message").value = "";
   }
 
-  function markMessagesAsRead(messages) {
-    const lastUnreadReceivedMessageSentAt = messages
-            .filter(m => m.senderId !== currentUserId && !m.read)
-            .map(m => m.sentAt)
-            .pop();
+  function markMessageAsRead(message) {
+    if (message.senderId === currentUserId || message.read) return;
 
-    if (lastUnreadReceivedMessageSentAt !== undefined) {
-      fetch(`/api/chatrooms/${currentChatRoomId}/messages/${lastUnreadReceivedMessageSentAt}/read`, {
-        method: "POST"
-      })
-              .then(res => {
-                if (!res.ok) {
-                  return res.json().then(err => {
-                    alert(err.message || "읽음 처리 실패");
-                    throw new Error(err.message);
-                  });
-                }
-                loadMessagesAndMarkAsRead(currentChatRoomId);
-              });
-    }
+    fetch(`/api/chatrooms/${currentChatRoomId}/messages/${message.sentAt}/read`, {
+      method: "POST"
+    }).catch(err => {
+      console.error("읽음 처리 실패", err);
+    });
   }
 </script>
 </body>

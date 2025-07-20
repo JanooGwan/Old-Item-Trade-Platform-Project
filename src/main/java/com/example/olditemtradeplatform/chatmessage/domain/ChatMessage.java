@@ -46,7 +46,9 @@ public class ChatMessage {
     boolean isRead;
 
     public void updateReadStatus() {
-        this.isRead = true;
+        if (!this.isRead) {
+            this.isRead = true;
+        }
     }
 
 }
