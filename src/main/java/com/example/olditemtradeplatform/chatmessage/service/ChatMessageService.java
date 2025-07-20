@@ -39,14 +39,7 @@ public class ChatMessageService {
 
         Long nextSentAt = chatMessageRepository.countByChatroom(chatRoom) + 1;
 
-        ChatMessage message = ChatMessage.builder()
-                .id(new ChatMessageId(chatRoom.getId(), nextSentAt))
-                .sender(sender)
-                .chatroom(chatRoom)
-                .content(dto.content())
-                .isRead(false)
-                .sentAt(nextSentAt)
-                .build();
+        ChatMessage message = dto.toEntity(sender, chatRoom, nextSentAt);
 
         return chatMessageRepository.save(message);
     }

@@ -30,7 +30,6 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(responseDTO);
     }
 
-
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         authService.logout(request);

@@ -35,6 +35,7 @@ public record ChatMessageRequestDTO(
                 .chatroom(chatRoom)
                 .content(content)
                 .isRead(false)
+                .sentAt(sentAt)
                 .build();
     }
 }

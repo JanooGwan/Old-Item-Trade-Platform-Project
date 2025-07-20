@@ -54,13 +54,13 @@ public class AuthorityService {
         return SuspendStatusResponseDTO.from(member);
     }
 
-
     @Transactional
     public void changeRole(Long memberId, String newRole) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(AuthorityErrorCode.MEMBER_NOT_FOUND));
 
         Role roleEnum;
+
         try {
             roleEnum = Role.valueOf(newRole.toUpperCase());
         } catch (IllegalArgumentException e) {
