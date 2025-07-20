@@ -52,7 +52,7 @@ public interface MemberApi {
     @Operation(summary = "회원가입", description = "신규 회원을 등록합니다.")
     @ApiResponse(responseCode = "200", description = "회원가입 성공", content = @Content(mediaType = "application/json"))
     @PostMapping("/signup")
-    ResponseEntity<String> signup(
+    ResponseEntity<MemberResponseDTO> signup(
             @RequestBody(
                     description = "회원가입 요청 DTO",
                     required = true,
@@ -60,6 +60,7 @@ public interface MemberApi {
             )
             @Valid @org.springframework.web.bind.annotation.RequestBody MemberRegisterRequestDTO request
     );
+
 
     @Operation(summary = "내 정보 수정", description = "현재 로그인한 회원의 정보를 수정합니다.")
     @ApiResponse(responseCode = "200", description = "수정 성공", content = @Content(mediaType = "application/json"))

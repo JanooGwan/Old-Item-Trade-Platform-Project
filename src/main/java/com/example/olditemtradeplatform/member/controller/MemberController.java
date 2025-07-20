@@ -52,9 +52,9 @@ public class MemberController implements MemberApi {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody @Valid MemberRegisterRequestDTO request) {
-        memberService.signup(request);
-        return ResponseEntity.ok("회원가입 성공");
+    public ResponseEntity<MemberResponseDTO> signup(@RequestBody @Valid MemberRegisterRequestDTO request) {
+        MemberResponseDTO response = memberService.signup(request);
+        return ResponseEntity.ok(response);
     }
 
 
