@@ -1,5 +1,6 @@
 package com.example.olditemtradeplatform.security;
 
+
 import com.example.olditemtradeplatform.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,8 +10,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,25 +19,23 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final com.example.olditemtradeplatform.security.handler.CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final com.example.olditemtradeplatform.security.handler.CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .formLogin(FormLoginConfigurer::disable)
-                .httpBasic(HttpBasicConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui.html", "/swagger-ui/**",
-                                "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
-                        ).permitAll()
-                        .requestMatchers(
+                                "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**",
                                 "/", "/auths/**", "/home", "/signup", "/login",
                                 "/css/**", "/js/**", "/images/**", "/uploads/**",
-                                "/api/members/signup", "/api/posts"
+                                "/api/members/signup", "/api/posts", "/favicon.ico"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -1,50 +1,46 @@
 package com.example.olditemtradeplatform.security.service;
 
-import com.example.olditemtradeplatform.global.exception.CustomException;
 import com.example.olditemtradeplatform.member.domain.Member;
-import com.example.olditemtradeplatform.security.CustomUserDetails;
-import com.example.olditemtradeplatform.security.dto.LoginRequestDTO;
+import com.example.olditemtradeplatform.member.dto.MemberLoginResponseDTO;
+import com.example.olditemtradeplatform.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private static final int SESSION_TIMEOUT_SECONDS = 1800;
+    private final MemberRepository memberRepository;
 
-    @Transactional
-    public void login(LoginRequestDTO request, HttpServletRequest httpRequest) {
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(request.userId(), request.password());
+    public MemberLoginResponseDTO login(String userId, String password, HttpServletRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userId, password)
+        );
 
-        Authentication authentication = authenticationManager.authenticate(token);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Member member = ((CustomUserDetails) authentication.getPrincipal()).getUser();
-        createSession(httpRequest, member);
+        HttpSession session = request.getSession();
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Member member = memberRepository.findByUserId(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("해당 아이디는 존재하지 않습니다."));
+
+        return MemberLoginResponseDTO.of(member.getId(), member.getNickname(), member.getRole().name()
+        );
     }
 
-    private void createSession(HttpServletRequest request, Member member) {
-        HttpSession session = request.getSession(true);
-        session.setAttribute("memberId", member.getId());
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-        session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
-    }
 
     public void logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-            SecurityContextHolder.clearContext();
-        }
+        request.getSession().invalidate();
     }
+
 }

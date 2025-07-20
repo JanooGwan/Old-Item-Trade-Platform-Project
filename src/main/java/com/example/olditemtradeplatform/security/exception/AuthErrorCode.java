@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum AuthErrorCode implements BaseErrorCode {
 
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 아이디는 존재하지 않습니다."),
     BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
     DISABLED_ACCOUNT(HttpStatus.UNAUTHORIZED, "비활성화된 계정입니다."),
     AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다.");

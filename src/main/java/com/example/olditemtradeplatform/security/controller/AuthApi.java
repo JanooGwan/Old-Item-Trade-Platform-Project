@@ -1,10 +1,11 @@
 package com.example.olditemtradeplatform.security.controller;
 
+import com.example.olditemtradeplatform.member.dto.MemberLoginResponseDTO;
 import com.example.olditemtradeplatform.security.dto.LoginRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,16 +17,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auths")
 public interface AuthApi {
 
-    @Operation(summary = "로그인", description = "아이디와 비밀번호로 로그인합니다. 성공 시 세션이 생성됩니다.")
-    @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(mediaType = "application/json"))
+    @Operation(summary = "로그인", description = "아이디와 비밀번호로 로그인합니다. 성공 시 세션이 생성되고 유저 정보를 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "로그인 성공",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MemberLoginResponseDTO.class)))
     @PostMapping("/login")
-    ResponseEntity<String> login(
-            @RequestBody(
+    ResponseEntity<MemberLoginResponseDTO> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "로그인 요청 DTO",
                     required = true,
-                    content = @Content(mediaType = "application/json")
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginRequestDTO.class))
             )
-            @Valid @org.springframework.web.bind.annotation.RequestBody LoginRequestDTO request,
+            @Valid @RequestBody LoginRequestDTO request,
 
             @Parameter(hidden = true)
             HttpServletRequest httpRequest
