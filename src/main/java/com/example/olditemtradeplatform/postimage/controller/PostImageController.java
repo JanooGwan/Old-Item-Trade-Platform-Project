@@ -23,7 +23,6 @@ public class PostImageController implements PostImageApi {
         return ResponseEntity.ok(postImageService.saveImage(dto));
     }
 
-
     @GetMapping("/{postId}/{imageAt}")
     public ResponseEntity<PostImageResponseDTO> getImage(
             @PathVariable Long postId,
