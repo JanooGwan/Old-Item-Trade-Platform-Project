@@ -3,6 +3,7 @@ package com.example.olditemtradeplatform.post.controller;
 import com.example.olditemtradeplatform.post.domain.DealStatus;
 import com.example.olditemtradeplatform.post.dto.*;
 import com.example.olditemtradeplatform.product.dto.ProductRequestDTO;
+import com.example.olditemtradeplatform.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -11,12 +12,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @Tag(name = "게시글 API", description = "게시글 작성, 조회, 수정, 삭제 기능 제공")
@@ -31,7 +32,7 @@ public interface PostApi {
             @PathVariable Long postId,
 
             @Parameter(hidden = true)
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails userDetails
     );
 
     @Operation(summary = "게시글 목록 조회", description = "전체 게시글 목록을 조회합니다. 거래 상태(dealStatus)로 필터링 가능합니다.")
@@ -69,7 +70,7 @@ public interface PostApi {
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
 
             @Parameter(hidden = true)
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails userDetails
     );
 
     @Operation(summary = "게시글 수정", description = "게시글 ID를 기반으로 게시글을 수정합니다. 작성자만 수정할 수 있습니다.")
@@ -87,7 +88,7 @@ public interface PostApi {
             @org.springframework.web.bind.annotation.RequestBody PostUpdateRequestDTO dto,
 
             @Parameter(hidden = true)
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails userDetails
     );
 
     @Operation(summary = "게시글 삭제", description = "게시글 ID를 기반으로 삭제합니다. 작성자만 삭제할 수 있습니다.")
@@ -98,6 +99,6 @@ public interface PostApi {
             @PathVariable Long postId,
 
             @Parameter(hidden = true)
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails userDetails
     );
 }

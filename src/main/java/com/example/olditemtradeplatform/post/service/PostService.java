@@ -35,22 +35,10 @@ public class PostService {
 
 
     @Transactional
-    public PostResponseDTO getPost(Long postId, Authentication authentication) {
-        Long currentUserId;
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof CustomUserDetails userDetails) {
-                currentUserId = userDetails.getMember().getId();
-            } else {
-                currentUserId = null;
-            }
-        } else {
-            currentUserId = null;
-        }
+    public PostResponseDTO getPost(Long postId, CustomUserDetails userDetails) {
+        Long currentUserId = (userDetails != null) ? userDetails.getMember().getId() : null;
 
         postRepository.incrementViewCount(postId);
-
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.POST_NOT_FOUND));
 
@@ -60,6 +48,7 @@ public class PostService {
 
         return PostResponseDTO.of(post, isAuthor, liked);
     }
+
 
     @Transactional(readOnly = true)
     public List<PostPreviewResponseDTO> getPosts() {

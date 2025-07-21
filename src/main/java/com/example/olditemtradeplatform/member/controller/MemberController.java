@@ -12,8 +12,7 @@ import com.example.olditemtradeplatform.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,23 +25,20 @@ public class MemberController implements MemberApi {
     private final MemberService memberService;
 
     @GetMapping("/me")
-    public ResponseEntity<MemberResponseDTO> getMyInfo(Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+    public ResponseEntity<MemberResponseDTO> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = userDetails.getMember();
-
-        MemberResponseDTO dto = MemberResponseDTO.from(member);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(MemberResponseDTO.from(member));
     }
 
     @GetMapping("/me/posts")
-    public ResponseEntity<List<PostPreviewInMypageResponseDTO>> getMyPosts(Authentication authentication) {
-        Member member = ((CustomUserDetails) authentication.getPrincipal()).getMember();
+    public ResponseEntity<List<PostPreviewInMypageResponseDTO>> getMyPosts(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Member member = userDetails.getMember();
         return ResponseEntity.ok(memberService.getMyPosts(member));
     }
 
     @GetMapping("/me/likes")
-    public ResponseEntity<List<PostPreviewResponseDTO>> getLikedPosts(Authentication authentication) {
-        Member member = ((CustomUserDetails) authentication.getPrincipal()).getMember();
+    public ResponseEntity<List<PostPreviewResponseDTO>> getLikedPosts(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Member member = userDetails.getMember();
         return ResponseEntity.ok(memberService.getLikedPosts(member));
     }
 
@@ -57,25 +53,19 @@ public class MemberController implements MemberApi {
         return ResponseEntity.ok(response);
     }
 
-
     @PutMapping("/me")
     public ResponseEntity<MemberResponseDTO> updateMyInfo(
             @RequestBody MemberUpdateRequestDTO requestDto,
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Member member = userDetails.getMember();
-
         MemberResponseDTO updated = memberService.updateMember(member, requestDto);
-
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<String> deleteMyAccount(Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+    public ResponseEntity<String> deleteMyAccount(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = userDetails.getMember();
-
         memberService.deleteMember(member.getId());
         return ResponseEntity.ok("회원 탈퇴 완료");
     }
