@@ -31,8 +31,9 @@ public class Member {
     @Column(nullable = false, length = 100)
     String password;
 
+    @Builder.Default
     @Column(nullable = false)
-    boolean isSuspended;
+    boolean isSuspended = false;
 
     @Column(length = 500)
     String suspendReason;
@@ -46,24 +47,30 @@ public class Member {
     @Column(nullable = false, unique = true, length = 500)
     String email;
 
+    @Builder.Default
     @OneToMany(mappedBy = "writer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member1", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> member1Rooms = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member2", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> member2Rooms = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true) // 식별 관계
     private List<Like> likes = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "reporter", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ReportOfPost> reportOfPosts = new ArrayList<>();
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    Role role;
+    Role role = Role.NORMAL;
 
 
     public void updateMember(String encryptedPassword, String email, String nickname) {

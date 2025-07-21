@@ -42,8 +42,9 @@ public class ChatMessage {
     @Column(nullable = false, updatable = false, insertable = false)
     Long sentAt;
 
+    @Builder.Default
     @Column(nullable = false)
-    boolean isRead;
+    boolean isRead = false;
 
     public void updateReadStatus() {
         if (!this.isRead) {

@@ -27,6 +27,7 @@ public class ChatRoom {
     @JoinColumn(name = "member2_id", nullable = false)
     Member member2;
 
+    @Builder.Default
     @OneToMany(mappedBy = "chatroom", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ChatMessage> chatmessages = new ArrayList<>();
 

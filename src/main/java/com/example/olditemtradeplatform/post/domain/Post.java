@@ -65,6 +65,7 @@ public class Post {
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     List<Product> products = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReportOfPost> reports = new ArrayList<>();
 
@@ -72,9 +73,10 @@ public class Post {
     @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Like> likes = new ArrayList<>();
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    DealStatus dealStatus;
+    DealStatus dealStatus = DealStatus.WAITING;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
