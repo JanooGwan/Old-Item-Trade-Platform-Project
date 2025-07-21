@@ -25,7 +25,6 @@ public class PostController implements PostApi {
 
     private final PostService postService;
 
-
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDTO> getPost(@PathVariable Long postId, Authentication authentication) {
         PostResponseDTO post = postService.getPost(postId, authentication);
@@ -39,7 +38,6 @@ public class PostController implements PostApi {
         List<PostPreviewResponseDTO> posts = postService.getPosts(dealStatus);
         return ResponseEntity.ok(posts);
     }
-
 
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<PostResponseDTO> createPost(

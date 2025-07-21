@@ -25,8 +25,8 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+/uploads/
 application.yml
-*.png
 
 ### NetBeans ###
 /nbproject/private/

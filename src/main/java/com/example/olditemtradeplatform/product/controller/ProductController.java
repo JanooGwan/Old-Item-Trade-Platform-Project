@@ -15,6 +15,11 @@ public class ProductController implements ProductApi {
 
     private final ProductService productService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable Long id) {
+        ProductResponseDTO product = productService.findProduct(id);
+        return ResponseEntity.ok(product);
+    }
 
     @PostMapping("/{postId}")
     public ResponseEntity<ProductResponseDTO> createProduct(
@@ -23,13 +28,6 @@ public class ProductController implements ProductApi {
     ) {
         ProductResponseDTO created = productService.createProduct(dto, postId);
         return ResponseEntity.ok(created);
-    }
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable Long id) {
-        ProductResponseDTO product = productService.findProduct(id);
-        return ResponseEntity.ok(product);
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.example.olditemtradeplatform.chatroom.controller;
 
 import com.example.olditemtradeplatform.chatroom.domain.ChatRoom;
+import com.example.olditemtradeplatform.chatroom.dto.ChatRoomRequestDTO;
 import com.example.olditemtradeplatform.chatroom.dto.ChatRoomResponseDTO;
 import com.example.olditemtradeplatform.chatroom.service.ChatRoomService;
 import com.example.olditemtradeplatform.member.domain.Member;
@@ -20,7 +21,6 @@ import java.util.Map;
 public class ChatRoomController implements ChatRoomApi {
 
     private final ChatRoomService chatRoomService;
-    private final MemberRepository memberRepository;
 
     @GetMapping
     public ResponseEntity<List<ChatRoomResponseDTO>> getMyChatRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -32,27 +32,24 @@ public class ChatRoomController implements ChatRoomApi {
     @PostMapping("/enter")
     public ResponseEntity<ChatRoomResponseDTO> enterChatRoom(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody Map<String, Long> body
+            @RequestBody ChatRoomRequestDTO request
     ) {
         Long me = userDetails.getMember().getId();
-        Long other = body.get("memberId");
+        Long other = request.memberId();
 
         ChatRoom room = chatRoomService.getOrCreateChatRoom(me, other);
         return ResponseEntity.ok(ChatRoomResponseDTO.from(room, me));
     }
 
+
     @PostMapping("/enter-by-nickname")
     public ResponseEntity<ChatRoomResponseDTO> enterChatRoomByNickname(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody Map<String, String> body
+            @RequestBody ChatRoomRequestDTO request
     ) {
-        String nickname = body.get("nickname");
-        Member me = userDetails.getMember();
-
-        Member target = memberRepository.findByNickname(nickname)
-                .orElseThrow(() -> new IllegalArgumentException("상대방 닉네임을 찾을 수 없습니다."));
-
-        ChatRoom room = chatRoomService.getOrCreateChatRoom(me.getId(), target.getId());
-        return ResponseEntity.ok(ChatRoomResponseDTO.from(room, me.getId()));
+        Long myId = userDetails.getMember().getId();
+        ChatRoom room = chatRoomService.getOrCreateChatRoomByNickname(myId, request.nickname());
+        return ResponseEntity.ok(ChatRoomResponseDTO.from(room, myId));
     }
+
 }

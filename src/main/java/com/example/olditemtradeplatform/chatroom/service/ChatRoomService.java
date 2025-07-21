@@ -50,4 +50,22 @@ public class ChatRoomService {
 
         return existing.orElseGet(() -> chatRoomRepository.save(new ChatRoom(member1, member2)));
     }
+
+    @Transactional
+    public ChatRoom getOrCreateChatRoomByNickname(Long myId, String nickname) {
+        Member me = memberRepository.findById(myId)
+                .orElseThrow(() -> new CustomException(ChatRoomErrorCode.SENDER_NOT_FOUND));
+
+        Member target = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new CustomException(ChatRoomErrorCode.RECEIVER_NOT_FOUND));
+
+        if (me.getId().equals(target.getId())) {
+            throw new CustomException(ChatRoomErrorCode.CANNOT_CHAT_WITH_SELF);
+        }
+
+        return chatRoomRepository
+                .findByMember1AndMember2OrMember2AndMember1(me, target, me, target)
+                .orElseGet(() -> chatRoomRepository.save(new ChatRoom(me, target)));
+    }
+
 }
